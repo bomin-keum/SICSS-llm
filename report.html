@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Measuring...the Unmeasurable? | SICSS 2026</title>
+<script src="https://cdn.jsdelivr.net/npm/plotly.js-dist-min@2.35.2/plotly.min.js"></script>
+<style>
+  :root {
+    --bg: #000000;
+    --panel: #0a0d16;
+    --panel2: #0e1220;
+    --border: #1b2436;
+    --text: #eef1f8;
+    --muted: #7d8699;
+    --accent: #2563eb;
+    --accent2: #38bdf8;
+    --gemma: #38bdf8;
+    --grok: #6366f1;
+    --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Inter, Roboto, Helvetica, Arial, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: radial-gradient(circle at 10% 0%, #0a0d18 0%, #000000 55%);
+    color: var(--text);
+    font-family: var(--font);
+    line-height: 1.55;
+  }
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 0 28px 100px; }
+  header.hero {
+    padding: 72px 28px 40px;
+    text-align: center;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 56px;
+  }
+  .kicker {
+    text-transform: uppercase;
+    letter-spacing: .18em;
+    font-size: 12.5px;
+    color: var(--accent2);
+    font-weight: 600;
+  }
+  h1.title {
+    font-size: 2.6rem;
+    line-height: 1.15;
+    margin: 14px auto 12px;
+    max-width: 780px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+  .subtitle { color: var(--muted); font-size: 1.05rem; max-width: 640px; margin: 0 auto; }
+  .authors {
+    margin-top: 26px;
+    display: flex; flex-wrap: wrap; justify-content: center; gap: 8px 26px;
+    font-size: 13px; color: var(--muted);
+  }
+  .authors .who { color: var(--text); font-weight: 600; }
+  .authors .aff { color: var(--muted); }
+  section { margin-bottom: 64px; }
+  .section-head { margin-bottom: 22px; }
+  .eyebrow {
+    font-size: 12.5px; text-transform: uppercase; letter-spacing: .14em;
+    color: var(--accent2); font-weight: 700; margin-bottom: 8px;
+  }
+  .cmp-tags { display:flex; gap:6px; margin: 2px 0 12px; flex-wrap:wrap; }
+  .cmp-tag {
+    font-size: 10.5px; text-transform: uppercase; letter-spacing: .05em; font-weight: 700;
+    color: #a9c6f5; background: rgba(56,189,248,.08); border: 1px solid rgba(56,189,248,.28);
+    padding: 3px 10px; border-radius: 6px;
+  }
+  h2 { font-size: 1.6rem; margin: 0 0 8px; font-weight: 700; }
+  .section-desc { color: var(--muted); max-width: 760px; font-size: .97rem; }
+  .why-copy { max-width: 760px; }
+  .why-copy p { color: #c7cdde; font-size: 1rem; margin: 0 0 16px; }
+  .why-copy p:last-child { margin-bottom: 0; }
+  .why-copy strong { color: var(--text); }
+
+  .stat-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-top: 28px;
+  }
+  .stat-card {
+    background: var(--panel); border: 1px solid var(--border); border-radius: 14px;
+    padding: 18px 20px; text-align: left;
+  }
+  .stat-card .exp-tag {
+    font-size: 11px; text-transform: uppercase; letter-spacing: .1em; font-weight: 700;
+    color: var(--accent2); margin-bottom: 8px;
+  }
+  .stat-card .num { font-size: 1.9rem; font-weight: 700; color: var(--text); }
+  .stat-card .lbl { color: var(--muted); font-size: 12.5px; margin-top: 4px; }
+
+  table.desc-table { width: 100%; border-collapse: collapse; background: var(--panel); border-radius: 14px; overflow: hidden; border: 1px solid var(--border); margin-top: 28px; }
+  table.desc-table th, table.desc-table td { padding: 14px 16px; text-align: left; border-bottom: 1px solid var(--border); font-size: .92rem; }
+  table.desc-table th { background: var(--panel2); color: var(--muted); font-weight: 600; text-transform: uppercase; font-size: 11.5px; letter-spacing: .06em;}
+  table.desc-table tr:last-child td { border-bottom: none; }
+  table.desc-table td.rowlabel { font-weight: 700; color: var(--text); }
+  table.desc-table td .sub { color: var(--muted); font-size: 12px; display:block; margin-top:2px; }
+  .tag-gemma { color: var(--gemma); font-weight: 700; }
+  .tag-grok { color: var(--grok); font-weight: 700; }
+
+  .panel { background: var(--panel); border: 1px solid var(--border); border-radius: 16px; padding: 24px; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+
+  .callout {
+    background: linear-gradient(135deg, rgba(37,99,235,.16), rgba(56,189,248,.07));
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 26px 28px;
+    margin-top: 28px;
+  }
+  .callout h3 { margin: 0 0 8px; font-size: 1.15rem; }
+  .callout p { margin: 0; color: var(--muted); font-size: .95rem; }
+
+  .toggle-row { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+  .toggle-btn {
+    background: var(--panel2); border: 1px solid var(--border); color: var(--muted);
+    padding: 8px 16px; border-radius: 999px; font-size: 12.5px; cursor: pointer; font-family: var(--font);
+  }
+  .toggle-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); font-weight: 700; }
+  .legend-note { color: var(--muted); font-size: 12px; margin-top: 10px; }
+
+  .fail-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 24px; }
+  .fail-card { background: var(--panel); border: 1px solid var(--border); border-radius: 14px; padding: 20px; }
+  .fail-card .n { color: var(--accent2); font-weight: 800; font-size: 12.5px; letter-spacing: .08em; }
+  .fail-card h4 { margin: 6px 0 8px; font-size: 1.02rem; }
+  .fail-card p { margin: 0; color: var(--muted); font-size: .89rem; }
+  .fail-card .ex { margin-top: 10px; font-size: .82rem; color: #c7cbe0; background: var(--panel2); border-radius: 8px; padding: 8px 10px; border-left: 3px solid var(--accent); }
+
+  footer { border-top: 1px solid var(--border); padding-top: 30px; color: var(--muted); font-size: .85rem; text-align:center; }
+  footer a { color: var(--accent2); }
+
+  @media (max-width: 860px) {
+    .stat-grid { grid-template-columns: repeat(2,1fr); }
+    .grid-2 { grid-template-columns: 1fr; }
+    .fail-grid { grid-template-columns: 1fr; }
+    h1.title { font-size: 1.9rem; }
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="kicker">SICSS 2026 &middot; University of Washington</div>
+  <h1 class="title">Measuring&hellip;the Unmeasurable?</h1>
+  <div class="subtitle">An iterative framework for using LLMs to study nuance in text.</div>
+  <div class="authors">
+    <span><span class="who">Bo Min Keum</span> &middot; <span class="aff">International CyberCrime Research Institute, SFU</span></span>
+    <span><span class="who">Roman Pomeshchikov</span> &middot; <span class="aff">Near and Middle Eastern Studies (NMES) Interdisciplinary Program, University of Washington</span></span>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <section id="why">
+    <div class="section-head">
+      <div class="eyebrow">01 &middot; First: Why?</div>
+      <h2>&ldquo;Nuance&rdquo; is hard to measure.</h2>
+    </div>
+    <div class="why-copy">
+      <p>Masculinity, populism, humiliation, identity threat, sarcasm, humour&hellip; concepts like these aren't directly measurable. They're theory-dependent, context-dependent, interpretive, and highly contested in the social sciences. There's no agreement on what they even mean.</p>
+      <p>LLMs are increasingly used to classify text. Human coders read nuance, but they don't scale to hundreds of thousands of posts &mdash; a struggle we've found in our own PhD research on online radicalization discourse (Bo Min Keum) and political discourse (Roman Pomeshchikov). But while LLMs scale, LLM-generated labels require human validation to make sure downstream analysis isn't affected &mdash; which requires considering construct validity: whether, through LLMs, we're measuring what we think we're measuring. If prompting changes what gets measured, prompt design becomes part of that validity question: are we actually measuring the thing we claim to measure?</p>
+      <p><strong>So we made the prompt itself the object of study.</strong> We started with a sample of 1.7K posts made on StormFront (a web forum associated with white-supremacist and far-right movements) on which gemma-3-27B and xai-grok-3.1 gave polar opposite scores &mdash; one model saw no conspiratorial content (0), the other saw conspiratorial rhetoric as the core of the message (3). That kind of disagreement was an indication to us that something about the post, or about how each model read it, was producing two entirely different readings. We randomly sampled 500 of these high-disagreement posts and ran them through four experiments &mdash; using gemma-3-27B and xai-grok-3.4 &mdash; testing whether refining the prompt changes what the two models "see" in the same text.</p>
+    </div>
+  </section>
+
+  <section id="table">
+    <div class="section-head">
+      <div class="eyebrow">02 &middot; Descriptive Overview</div>
+      <p class="section-desc">All four experiments re-score the same 500 posts, so results are comparable across experiments. Exp0, Exp1, and Exp3 use a 0&ndash;3 Likert scale, so change is reported as mean absolute shift from baseline. Exp2 is a binary label, so change is reported as the share of posts that flipped away from their original baseline extreme (0&rarr;1 or 3&rarr;0).</p>
+    </div>
+
+    <div class="stat-grid">
+      <div class="stat-card"><div class="exp-tag">Exp 0</div><div class="num">0%</div><div class="lbl">cross-model agreement (baseline)</div></div>
+      <div class="stat-card"><div class="exp-tag">Exp 1</div><div class="num">56.6%</div><div class="lbl">agreement after requiring justification</div></div>
+      <div class="stat-card"><div class="exp-tag">Exp 2</div><div class="num">77.8%</div><div class="lbl">agreement after decomposing into 11 dimensions</div></div>
+      <div class="stat-card"><div class="exp-tag">Exp 3</div><div class="num">35.4%</div><div class="lbl">agreement with a more specific Likert scale</div></div>
+    </div>
+
+    <table class="desc-table">
+      <thead>
+        <tr><th>Experiment</th><th class="tag-gemma">GEMMA</th><th class="tag-grok">GROK</th><th>Cross-model agreement</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="rowlabel">Exp 0 &middot; Baseline<span class="sub">0&ndash;3 Likert, no justification</span></td>
+          <td>mean 1.5<span class="sub">250 posts @ 0, 250 @ 3 (by design)</span></td>
+          <td>mean 1.5<span class="sub">250 posts @ 0, 250 @ 3 (by design)</span></td>
+          <td>0.0%<span class="sub">avg. distance 3.0 / 3</span></td>
+        </tr>
+        <tr>
+          <td class="rowlabel">Exp 1 &middot; Justification<span class="sub">same prompt + required reasoning</span></td>
+          <td>&Delta; 2.14<span class="sub">85.0% of posts changed score</span></td>
+          <td>&Delta; 0.64<span class="sub">43.4% of posts changed score</span></td>
+          <td>56.6%<span class="sub">avg. distance 0.59</span></td>
+        </tr>
+        <tr>
+          <td class="rowlabel">Exp 2 &middot; Decomposition<span class="sub">11 dims &rarr; binary label</span></td>
+          <td>62.6% flipped<span class="sub">25.0% labeled positive overall</span></td>
+          <td>36.2% flipped<span class="sub">17.4% labeled positive overall</span></td>
+          <td>77.8%<span class="sub">4/13 marked uncertain (G/R)</span></td>
+        </tr>
+        <tr>
+          <td class="rowlabel">Exp 3 &middot; More Specific Likert<span class="sub">rewritten scale, no justification</span></td>
+          <td>&Delta; 1.8<span class="sub">69.4% of posts changed score</span></td>
+          <td>&Delta; 0.67<span class="sub">44.6% of posts changed score</span></td>
+          <td>35.4%<span class="sub">avg. distance 1.2</span></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="callout">
+      <h3>Our Observations</h3>
+      <p>Cross-model agreement climbed steadily from justification (Exp 1: 56.6%) to decomposition (Exp 2: 77.8%) &mdash; then <strong>dropped</strong> under the more specific Likert scale (Exp 3: 35.4%), below even Exp 1. Breaking the construct into checkable sub-dimensions did more for cross-model agreement than writing a more careful version of the same holistic scale. GEMMA's scores also moved more than GROK's at every stage: its mean absolute shift from baseline was 2.14 in Exp 1 and 1.8 in Exp 3 &mdash; roughly 3.3&times; and 2.7&times; GROK's.</p>
+    </div>
+  </section>
+
+  <section id="agreement-chart">
+    <div class="section-head">
+      <div class="eyebrow">03 &middot; Model Agreement Across Experiments</div>
+      <div class="cmp-tags"><span class="cmp-tag">Across-experiment</span></div>
+      <h2>Agreement rose, then fell</h2>
+      <p class="section-desc">Decomposition (Exp 2) produced the highest cross-model agreement of any prompting strategy tested &mdash; higher than either Likert variant.</p>
+    </div>
+    <div class="panel"><div id="agreementChart" style="height:360px;"></div></div>
+  </section>
+
+  <section id="volatility-chart">
+    <div class="grid-2">
+      <div>
+        <div class="section-head">
+          <div class="eyebrow">04 &middot; Score Movement</div>
+          <div class="cmp-tags"><span class="cmp-tag">Model vs. model</span><span class="cmp-tag">Across-experiment</span></div>
+          <h2>Which model moved more?</h2>
+          <p class="section-desc">Mean absolute change from the Exp 0 baseline score, by model and experiment.</p>
+        </div>
+        <div class="panel"><div id="volatilityChart" style="height:340px;"></div></div>
+      </div>
+      <div>
+        <div class="section-head">
+          <div class="eyebrow">05 &middot; Label Breakdown</div>
+          <div class="cmp-tags"><span class="cmp-tag">Model vs. model</span><span class="cmp-tag">Within Exp 2</span></div>
+          <h2>Exp 2: positive, negative, or uncertain?</h2>
+          <p class="section-desc">Full breakdown of how each model labeled the 500 posts once conspiracy was decomposed into 11 checkable dimensions: positive (conspiratorial), negative (not conspiratorial), or uncertain.</p>
+        </div>
+        <div class="panel"><div id="posrateChart" style="height:340px;"></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="dims">
+    <div class="section-head">
+      <div class="eyebrow">06 &middot; Where the Models Diverge</div>
+      <div class="cmp-tags"><span class="cmp-tag">Model vs. model</span><span class="cmp-tag">Within Exp 2</span></div>
+      <h2>Dimension-level (dis)agreement, Experiment 2</h2>
+      <p class="section-desc">Endorsement rate per dimension (% of 500 posts each model flagged "yes"), plus how often the two models agreed on that dimension specifically. Hidden truth shows the widest gap.</p>
+    </div>
+    <div class="panel"><div id="dimChart" style="height:460px;"></div></div>
+  </section>
+
+  <section id="heatmap">
+    <div class="section-head">
+      <div class="eyebrow">07 &middot; Post-Level Trajectories</div>
+      <h2>Which posts stayed stable, which stayed contested</h2>
+      <p class="section-desc">Each row is one post; each column is a model's score at a given experiment (Exp 2 is binary, rescaled 0/3 for display &mdash; hover shows the real 0/1 label). Rows are sorted by the final gap between GEMMA and GROK at Exp 3.</p>
+    </div>
+    <div class="toggle-row">
+      <button class="toggle-btn active" data-view="persist">Most persistent disagreement (40)</button>
+      <button class="toggle-btn" data-view="resolved">Most resolved (40)</button>
+      <button class="toggle-btn" data-view="all">Full sample (500, scroll)</button>
+    </div>
+    <div class="panel">
+      <div id="heatmapDiv" style="overflow-y:auto; max-height:760px;"></div>
+      <div class="legend-note">Grey cells = uncertain / not classified. Color scale: dark blue (0, absent) &rarr; bright cyan (3, central). * Exp 2 columns show a binary label rescaled onto the same 0/3 axis for visual comparison only.</div>
+    </div>
+  </section>
+
+  <section id="failures">
+    <div class="section-head">
+      <div class="eyebrow">08 &middot; Useful &ldquo;Failures&rdquo;</div>
+      <h2>What to check before trusting an LLM label</h2>
+      <p class="section-desc">We found three patterns across iterations that could be useful as a checklist for anyone building a similar measurement prompt.</p>
+    </div>
+    <div class="fail-grid">
+      <div class="fail-card">
+        <div class="n">01</div>
+        <h4>Interchangeability</h4>
+        <p>The model substitutes one construct for another, and has inconsistent conceptual scope.</p>
+        <div class="ex">Example: ideology read as conspiracy, conspiracy read as generalized distrust, grievance read as anger.</div>
+      </div>
+      <div class="fail-card">
+        <div class="n">02</div>
+        <h4>Over-picking / under-picking</h4>
+        <p>The model accepts weak evidence too readily (inflated false positives), or misses implicit/contextual evidence (false negatives).</p>
+        <div class="ex">Example: GEMMA treated a belief the author explicitly rejected as evidence of coordination &mdash; mistaking a quoted, debunked claim for the author's own.</div>
+      </div>
+      <div class="fail-card">
+        <div class="n">03</div>
+        <h4>Inconsistent thresholds</h4>
+        <p>Different models apply different thresholds to the same prompt. This becomes visible once justification is required &mdash; useful for researchers assessing whether a model's interpretation of text aligns with their research interests, and if not, how the prompt should be iteratively refined.</p>
+        <div class="ex">Example: GROK was more conservative than GEMMA in satisfying the criteria required to label a post "conspiratorial." GEMMA made more inferences and drew that boundary more broadly than intended. Which is preferable depends on context (e.g. white-supremacist vs. anti-vaccine conspiratorial rhetoric) and on what the researcher needs to measure &mdash; conspiracy as a gradient, or as a binary.</div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    Measuring&hellip;the Unmeasurable? &middot; SICSS 2026 project deliverable &middot; prompt library, comparative reasoning, and failure catalogue in the accompanying repository.
+  </footer>
+
+</div>
+
+<script>
+const DATA = {"posts": [{"id": 361170857, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 0.0, "e1r": 1.0, "e2g": 0.0, "e2r": 1.0, "e3g": 0.0, "e3r": 1.0}, {"id": 11571650, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 1.0, "e1r": 1.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 1.0}, {"id": 151214315, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 0.0, "e1r": 0.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 0.0}, {"id": 150986732, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 0.0, "e1r": 0.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 0.0}, {"id": 13825064, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 1.0, "e1r": 0.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 0.0}, {"id": 14364592, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 1.0, "e1r": 2.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 2.0}, {"id": 359477754, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 3.0, "e1r": 0.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 1.0}, {"id": 360889852, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 0.0, "e1r": 2.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 1.0}, {"id": 359477059, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 3.0, "e1r": 0.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 1.0}, {"id": 166283268, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 2.0, "e1r": 1.0, "e2g": 0.0, "e2r": null, "e3g": 1.0, "e3r": 1.0}, {"id": 14939371, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 0.0, "e1r": 0.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 0.0}, {"id": 11763256, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 1.0, "e1r": 1.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 1.0}, {"id": 19726238, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 2.0, "e1r": 0.0, "e2g": 0.0, "e2r": 0.0, "e3g": 1.0, "e3r": 0.0}, {"id": 151521130, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 0.0, "e1r": 0.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 0.0}, {"id": 360373610, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 3.0, "e1r": 2.0, "e2g": 1.0, "e2r": 1.0, "e3g": 1.0, "e3r": 2.0}, {"id": 14364544, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 0.0, "e1r": 1.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 0.0}, {"id": 12582057, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 2.0, "e1r": 2.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 2.0}, {"id": 13664005, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 1.0, "e1r": 0.0, "e2g": 0.0, "e2r": null, "e3g": 0.0, "e3r": 0.0}, {"id": 19003144, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 3.0, "e1r": 0.0, "e2g": 0.0, "e2r": null, "e3g": 0.0, "e3r": 3.0}, {"id": 361732586, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 0.0, "e1r": 0.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 0.0}, {"id": 11492917, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 3.0, "e1r": 2.0, "e2g": 0.0, "e2r": 0.0, "e3g": 3.0, "e3r": 2.0}, {"id": 361646302, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 0.0, "e1r": 0.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 0.0}, {"id": 13680544, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 1.0, "e1r": 0.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 0.0}, {"id": 360152729, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 2.0, "e1r": 0.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 2.0}, {"id": 16419933, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 0.0, "e1r": 0.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 0.0}, {"id": 361409673, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 2.0, "e1r": 2.0, "e2g": 1.0, "e2r": null, "e3g": 0.0, "e3r": 2.0}, {"id": 18515439, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 0.0, "e1r": 0.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 0.0}, {"id": 361023132, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 0.0, "e1r": 0.0, "e2g": 0.0, "e2r": 1.0, "e3g": 0.0, "e3r": 1.0}, {"id": 11727310, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 0.0, "e1r": 1.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 1.0}, {"id": 19435164, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 0.0, "e1r": 0.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 0.0}, {"id": 19291989, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 3.0, "e1r": 0.0, "e2g": 1.0, "e2r": 0.0, "e3g": 0.0, "e3r": 0.0}, {"id": 17011489, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 0.0, "e1r": 0.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 0.0}, {"id": 19296699, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 3.0, "e1r": 1.0, "e2g": 0.0, "e2r": null, "e3g": 0.0, "e3r": 2.0}, {"id": 18370706, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 1.0, "e1r": 1.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 1.0}, {"id": 17867775, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 0.0, "e1r": 0.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 0.0}, {"id": 16424175, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 3.0, "e1r": 2.0, "e2g": 1.0, "e2r": 1.0, "e3g": 0.0, "e3r": 3.0}, {"id": 14552079, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 0.0, "e1r": 0.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 0.0}, {"id": 17353873, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 3.0, "e1r": 0.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 0.0}, {"id": 151712821, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 1.0, "e1r": 1.0, "e2g": 0.0, "e2r": 0.0, "e3g": 1.0, "e3r": 0.0}, {"id": 360149882, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 3.0, "e1r": 2.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 2.0}, {"id": 18383603, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 0.0, "e1r": 0.0, "e2g": 0.0, "e2r": null, "e3g": 0.0, "e3r": 0.0}, {"id": 20267327, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 3.0, "e1r": 2.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 0.0}, {"id": 14371286, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 1.0, "e1r": 2.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 2.0}, {"id": 360912602, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 1.0, "e1r": 0.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 0.0}, {"id": 15875356, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 1.0, "e1r": 0.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 1.0}, {"id": 361645283, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 0.0, "e1r": 0.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 0.0}, {"id": 361726593, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 2.0, "e1r": 0.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 1.0}, {"id": 19079381, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 3.0, "e1r": 0.0, "e2g": 1.0, "e2r": 0.0, "e3g": 3.0, "e3r": 0.0}, {"id": 150945736, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 3.0, "e1r": 0.0, "e2g": 0.0, "e2r": null, "e3g": 0.0, "e3r": 0.0}, {"id": 11636735, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 0.0, "e1r": 1.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 0.0}, {"id": 15206666, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 3.0, "e1r": 0.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 2.0}, {"id": 19667764, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 3.0, "e1r": 2.0, "e2g": 1.0, "e2r": 0.0, "e3g": 0.0, "e3r": 2.0}, {"id": 17818339, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 2.0, "e1r": 2.0, "e2g": 1.0, "e2r": 1.0, "e3g": 0.0, "e3r": 0.0}, {"id": 166068976, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 0.0, "e1r": 0.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 0.0}, {"id": 19322553, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 0.0, "e1r": 0.0, "e2g": 0.0, "e2r": null, "e3g": 0.0, "e3r": 0.0}, {"id": 19711900, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 3.0, "e1r": 3.0, "e2g": 0.0, "e2r": 0.0, "e3g": 3.0, "e3r": 0.0}, {"id": 12914414, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 0.0, "e1r": 0.0, "e2g": 0.0, "e2r": null, "e3g": 0.0, "e3r": 0.0}, {"id": 19191863, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 0.0, "e1r": 2.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 0.0}, {"id": 13530976, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 0.0, "e1r": 0.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 0.0}, {"id": 151728617, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 0.0, "e1r": 0.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 1.0}, {"id": 17800568, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 0.0, "e1r": 0.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 0.0}, {"id": 11571726, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 3.0, "e1r": 2.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 1.0}, {"id": 361223432, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 1.0, "e1r": 2.0, "e2g": 0.0, "e2r": 0.0, "e3g": 1.0, "e3r": 1.0}, {"id": 18968608, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 0.0, "e1r": 0.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 0.0}, {"id": 361750087, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 2.0, "e1r": 0.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 0.0}, {"id": 151648485, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 0.0, "e1r": 0.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 0.0}, {"id": 361733004, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 1.0, "e1r": 2.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 1.0}, {"id": 151214271, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 3.0, "e1r": 0.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 0.0}, {"id": 359540741, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 1.0, "e1r": 1.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 1.0}, {"id": 151235659, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 1.0, "e1r": 0.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 0.0}, {"id": 20211815, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 0.0, "e1r": 0.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 0.0}, {"id": 15091586, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 3.0, "e1r": 3.0, "e2g": 1.0, "e2r": null, "e3g": 3.0, "e3r": 0.0}, {"id": 17164111, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 1.0, "e1r": null, "e2g": 1.0, "e2r": 0.0, "e3g": 0.0, "e3r": 2.0}, {"id": 360532459, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": null, "e1r": 2.0, "e2g": 0.0, "e2r": null, "e3g": 3.0, "e3r": 0.0}, {"id": 16489883, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 2.0, "e1r": 0.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 1.0}, {"id": 165959774, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 2.0, "e1r": 2.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 2.0}, {"id": 151540461, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 0.0, "e1r": 1.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 1.0}, {"id": 151093969, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 3.0, "e1r": 2.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 2.0}, {"id": 20534997, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 0.0, "e1r": 0.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 1.0}, {"id": 360110374, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 0.0, "e1r": 0.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 0.0}, {"id": 361140941, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 1.0, "e1r": 0.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 1.0}, {"id": 15006642, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 0.0, "e1r": 0.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 0.0}, {"id": 18920972, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 3.0, "e1r": 1.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 2.0}, {"id": 359464670, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 3.0, "e1r": 0.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 3.0}, {"id": 361733055, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 3.0, "e1r": 2.0, "e2g": 1.0, "e2r": 1.0, "e3g": 0.0, "e3r": 2.0}, {"id": 361138842, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 2.0, "e1r": 0.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 0.0}, {"id": 16468032, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 0.0, "e1r": 0.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 0.0}, {"id": 359469095, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 2.0, "e1r": 2.0, "e2g": 0.0, "e2r": 1.0, "e3g": 0.0, "e3r": 2.0}, {"id": 150986730, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 3.0, "e1r": 0.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 0.0}, {"id": 13309632, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 0.0, "e1r": 2.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 1.0}, {"id": 17165333, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 1.0, "e1r": 2.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 1.0}, {"id": 18389947, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 2.0, "e1r": 0.0, "e2g": 0.0, "e2r": 0.0, "e3g": 1.0, "e3r": 2.0}, {"id": 361435275, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 0.0, "e1r": 0.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 0.0}, {"id": 20184852, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 1.0, "e1r": 2.0, "e2g": 1.0, "e2r": 0.0, "e3g": 1.0, "e3r": 2.0}, {"id": 16447422, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 1.0, "e1r": 0.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 0.0}, {"id": 150973374, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 1.0, "e1r": 2.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 0.0}, {"id": 15858418, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 2.0, "e1r": 0.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 1.0}, {"id": 15072012, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 0.0, "e1r": 0.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 0.0}, {"id": 359683255, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 0.0, "e1r": 0.0, "e2g": 1.0, "e2r": 0.0, "e3g": 0.0, "e3r": 0.0}, {"id": 15876411, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 3.0, "e1r": 2.0, "e2g": 0.0, "e2r": 0.0, "e3g": 3.0, "e3r": 1.0}, {"id": 19985625, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 1.0, "e1r": 0.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 0.0}, {"id": 18968023, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 2.0, "e1r": 2.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 2.0}, {"id": 360884411, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 3.0, "e1r": 2.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 3.0}, {"id": 15850240, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 2.0, "e1r": 0.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 1.0}, {"id": 18617068, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 2.0, "e1r": 0.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 2.0}, {"id": 13362828, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 0.0, "e1r": 0.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 1.0}, {"id": 11639951, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 1.0, "e1r": 0.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 1.0}, {"id": 11880053, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 0.0, "e1r": 0.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 0.0}, {"id": 151241396, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 0.0, "e1r": 0.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 0.0}, {"id": 359461151, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 3.0, "e1r": 2.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 3.0}, {"id": 15881215, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 2.0, "e1r": 0.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 1.0}, {"id": 12104737, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 3.0, "e1r": 2.0, "e2g": 1.0, "e2r": 0.0, "e3g": 0.0, "e3r": 3.0}, {"id": 361712017, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 0.0, "e1r": 0.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 1.0}, {"id": 151214432, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 0.0, "e1r": 0.0, "e2g": 0.0, "e2r": 0.0, "e3g": null, "e3r": 0.0}, {"id": 11496416, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 0.0, "e1r": 1.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 0.0}, {"id": 151327690, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 0.0, "e1r": 0.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 0.0}, {"id": 360957863, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 2.0, "e1r": 2.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 2.0}, {"id": 11551053, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 0.0, "e1r": 1.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 0.0}, {"id": 16480687, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 0.0, "e1r": 0.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 0.0}, {"id": 151328795, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 1.0, "e1r": 0.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 1.0}, {"id": 19936252, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 1.0, "e1r": 1.0, "e2g": 0.0, "e2r": 0.0, "e3g": 1.0, "e3r": 2.0}, {"id": 360069161, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 0.0, "e1r": 0.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 0.0}, {"id": 11614085, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 0.0, "e1r": 1.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 0.0}, {"id": 15887939, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 3.0, "e1r": 0.0, "e2g": 0.0, "e2r": 0.0, "e3g": 3.0, "e3r": 0.0}, {"id": 361763599, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 1.0, "e1r": 0.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 1.0}, {"id": 13038060, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 1.0, "e1r": 0.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 1.0}, {"id": 11639969, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 0.0, "e1r": 0.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 0.0}, {"id": 11638704, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 0.0, "e1r": 1.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 1.0}, {"id": 11719851, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": null, "e1r": 0.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 0.0}, {"id": 20164359, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 1.0, "e1r": null, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 2.0}, {"id": 151195237, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 1.0, "e1r": 0.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 0.0}, {"id": 359469709, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 0.0, "e1r": 3.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 2.0}, {"id": 21153477, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 3.0, "e1r": 0.0, "e2g": 1.0, "e2r": 0.0, "e3g": 0.0, "e3r": 1.0}, {"id": 361397589, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 3.0, "e1r": 1.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 0.0}, {"id": 17797004, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 0.0, "e1r": 0.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 0.0}, {"id": 359627918, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 1.0, "e1r": 1.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 2.0}, {"id": 18214054, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 2.0, "e1r": 2.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 2.0}, {"id": 14427768, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 0.0, "e1r": 0.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 0.0}, {"id": 359461418, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 1.0, "e1r": 2.0, "e2g": 0.0, "e2r": null, "e3g": 0.0, "e3r": 2.0}, {"id": 13139965, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 0.0, "e1r": 0.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 2.0}, {"id": 361416990, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 0.0, "e1r": 0.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 0.0}, {"id": 361098308, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 0.0, "e1r": 0.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 0.0}, {"id": 15874543, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 3.0, "e1r": 2.0, "e2g": 1.0, "e2r": 0.0, "e3g": 3.0, "e3r": 3.0}, {"id": 17481569, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 0.0, "e1r": 0.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 0.0}, {"id": 360347141, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 3.0, "e1r": 1.0, "e2g": 1.0, "e2r": 0.0, "e3g": 1.0, "e3r": 2.0}, {"id": 361732727, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 3.0, "e1r": 2.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 1.0}, {"id": 18280086, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 1.0, "e1r": 2.0, "e2g": 1.0, "e2r": 0.0, "e3g": 0.0, "e3r": 1.0}, {"id": 11636418, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 3.0, "e1r": 2.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 2.0}, {"id": 17214033, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 0.0, "e1r": 0.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 0.0}, {"id": 19275346, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 0.0, "e1r": 1.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 0.0}, {"id": 359465475, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 2.0, "e1r": 2.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 1.0}, {"id": 19198003, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 1.0, "e1r": 2.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 1.0}, {"id": 19431375, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 0.0, "e1r": 0.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 0.0}, {"id": 15863690, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 2.0, "e1r": 1.0, "e2g": 0.0, "e2r": 0.0, "e3g": 1.0, "e3r": 1.0}, {"id": 15890819, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 3.0, "e1r": 2.0, "e2g": 0.0, "e2r": 0.0, "e3g": 3.0, "e3r": 3.0}, {"id": 19276499, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 0.0, "e1r": 0.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 0.0}, {"id": 151214209, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 0.0, "e1r": 0.0, "e2g": null, "e2r": 0.0, "e3g": 0.0, "e3r": 0.0}, {"id": 17284268, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 0.0, "e1r": 0.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 0.0}, {"id": 17347066, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 0.0, "e1r": 1.0, "e2g": 1.0, "e2r": 0.0, "e3g": 0.0, "e3r": 0.0}, {"id": 13522598, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 0.0, "e1r": 0.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 0.0}, {"id": 18384107, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 1.0, "e1r": 0.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 0.0}, {"id": 11637506, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 3.0, "e1r": 0.0, "e2g": null, "e2r": null, "e3g": 3.0, "e3r": 2.0}, {"id": 14430888, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 2.0, "e1r": 1.0, "e2g": 0.0, "e2r": 1.0, "e3g": 0.0, "e3r": 2.0}, {"id": 361230505, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 3.0, "e1r": 0.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 0.0}, {"id": 360863184, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 1.0, "e1r": 1.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 0.0}, {"id": 18968607, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 3.0, "e1r": 0.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 0.0}, {"id": 151494735, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 3.0, "e1r": 0.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 1.0}, {"id": 361371963, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 3.0, "e1r": 2.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 2.0}, {"id": 151598943, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 0.0, "e1r": 1.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 0.0}, {"id": 151022393, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 1.0, "e1r": 1.0, "e2g": 0.0, "e2r": 1.0, "e3g": 0.0, "e3r": 1.0}, {"id": 361047292, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 3.0, "e1r": 2.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 2.0}, {"id": 361419492, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 3.0, "e1r": 2.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 3.0}, {"id": 12147229, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 1.0, "e1r": 1.0, "e2g": 0.0, "e2r": 0.0, "e3g": 1.0, "e3r": 2.0}, {"id": 165936945, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 3.0, "e1r": 1.0, "e2g": 0.0, "e2r": null, "e3g": 0.0, "e3r": 1.0}, {"id": 360575494, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 0.0, "e1r": 0.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 0.0}, {"id": 11867419, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 3.0, "e1r": 2.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 2.0}, {"id": 18620206, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 0.0, "e1r": 0.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 0.0}, {"id": 361366292, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 0.0, "e1r": 0.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 0.0}, {"id": 359519268, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 3.0, "e1r": 1.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 1.0}, {"id": 361719400, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 0.0, "e1r": 0.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 0.0}, {"id": 17357615, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 2.0, "e1r": 0.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 0.0}, {"id": 20519857, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 0.0, "e1r": 0.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 0.0}, {"id": 361732819, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 1.0, "e1r": 1.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 1.0}, {"id": 12051685, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 0.0, "e1r": 0.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 0.0}, {"id": 11558148, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 0.0, "e1r": 0.0, "e2g": 1.0, "e2r": 0.0, "e3g": 0.0, "e3r": 0.0}, {"id": 12500035, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 3.0, "e1r": 3.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 3.0}, {"id": 18890966, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 0.0, "e1r": 0.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 0.0}, {"id": 359469665, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 3.0, "e1r": 1.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 1.0}, {"id": 13718093, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 0.0, "e1r": 0.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 0.0}, {"id": 11574155, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 0.0, "e1r": 0.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 0.0}, {"id": 13199659, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 3.0, "e1r": 2.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 2.0}, {"id": 151516336, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 1.0, "e1r": 0.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 0.0}, {"id": 14335681, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 3.0, "e1r": 2.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 2.0}, {"id": 149668841, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 1.0, "e1r": 0.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 1.0}, {"id": 166172120, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 3.0, "e1r": 2.0, "e2g": 1.0, "e2r": 1.0, "e3g": 0.0, "e3r": 3.0}, {"id": 11637504, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 3.0, "e1r": 0.0, "e2g": null, "e2r": 0.0, "e3g": null, "e3r": 0.0}, {"id": 104817227, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 2.0, "e1r": 0.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 0.0}, {"id": 15063523, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 0.0, "e1r": 0.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 0.0}, {"id": 20635313, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 2.0, "e1r": 2.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 1.0}, {"id": 359468539, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 3.0, "e1r": 2.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 2.0}, {"id": 16437538, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 0.0, "e1r": 0.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 0.0}, {"id": 13167246, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 3.0, "e1r": 2.0, "e2g": 0.0, "e2r": 0.0, "e3g": 3.0, "e3r": 3.0}, {"id": 150562205, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 0.0, "e1r": 0.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 0.0}, {"id": 19181380, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 1.0, "e1r": 0.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 0.0}, {"id": 20255110, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 3.0, "e1r": 0.0, "e2g": 1.0, "e2r": 0.0, "e3g": 3.0, "e3r": 2.0}, {"id": 18298564, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": null, "e1r": 2.0, "e2g": 0.0, "e2r": 0.0, "e3g": null, "e3r": 0.0}, {"id": 15850124, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 3.0, "e1r": 3.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 3.0}, {"id": 13138143, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 2.0, "e1r": 0.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 1.0}, {"id": 166286710, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 1.0, "e1r": 1.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 2.0}, {"id": 12983553, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 3.0, "e1r": 2.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 2.0}, {"id": 18189052, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 0.0, "e1r": 0.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 0.0}, {"id": 151701254, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 2.0, "e1r": 0.0, "e2g": 1.0, "e2r": 0.0, "e3g": 0.0, "e3r": 1.0}, {"id": 19026261, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 2.0, "e1r": 1.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 1.0}, {"id": 19279573, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 3.0, "e1r": 3.0, "e2g": null, "e2r": null, "e3g": 3.0, "e3r": 0.0}, {"id": 103785784, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 0.0, "e1r": 0.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 0.0}, {"id": 13664457, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 3.0, "e1r": 0.0, "e2g": 0.0, "e2r": 0.0, "e3g": 3.0, "e3r": 2.0}, {"id": 151214091, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 3.0, "e1r": 2.0, "e2g": 1.0, "e2r": null, "e3g": 3.0, "e3r": 3.0}, {"id": 361911219, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 1.0, "e1r": 2.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 0.0}, {"id": 21133001, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 0.0, "e1r": 0.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 0.0}, {"id": 17750454, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 1.0, "e1r": 0.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 1.0}, {"id": 361744380, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 1.0, "e1r": 0.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 0.0}, {"id": 151327729, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 0.0, "e1r": 0.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 0.0}, {"id": 361732859, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 1.0, "e1r": 1.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 0.0}, {"id": 18406436, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 0.0, "e1r": 0.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 0.0}, {"id": 166001005, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 1.0, "e1r": 0.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 0.0}, {"id": 361565765, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 0.0, "e1r": 0.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 0.0}, {"id": 12926584, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 3.0, "e1r": 2.0, "e2g": 1.0, "e2r": null, "e3g": 0.0, "e3r": 3.0}, {"id": 13664454, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 0.0, "e1r": 1.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 0.0}, {"id": 14011839, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 3.0, "e1r": 3.0, "e2g": null, "e2r": 0.0, "e3g": null, "e3r": 0.0}, {"id": 360858784, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 2.0, "e1r": 2.0, "e2g": 0.0, "e2r": 0.0, "e3g": 1.0, "e3r": 1.0}, {"id": 20189870, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 0.0, "e1r": 0.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 0.0}, {"id": 149397494, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 3.0, "e1r": 0.0, "e2g": 1.0, "e2r": 0.0, "e3g": 2.0, "e3r": 2.0}, {"id": 151244542, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 0.0, "e1r": 0.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 0.0}, {"id": 361745074, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 3.0, "e1r": 1.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 2.0}, {"id": 12493299, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 3.0, "e1r": 1.0, "e2g": 1.0, "e2r": 0.0, "e3g": 1.0, "e3r": 0.0}, {"id": 19208979, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 1.0, "e1r": 1.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 1.0}, {"id": 16990748, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 1.0, "e1r": null, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 2.0}, {"id": 165545487, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 0.0, "e1r": 0.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 0.0}, {"id": 19221243, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 0.0, "e1r": 0.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 0.0}, {"id": 13466748, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 2.0, "e1r": 1.0, "e2g": 1.0, "e2r": 1.0, "e3g": 0.0, "e3r": 1.0}, {"id": 151441960, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 1.0, "e1r": 0.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 0.0}, {"id": 16467168, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 3.0, "e1r": 0.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 1.0}, {"id": 19361278, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 0.0, "e1r": 0.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 0.0}, {"id": 151214228, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 0.0, "e1r": 0.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 0.0}, {"id": 18032758, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 3.0, "e1r": 1.0, "e2g": null, "e2r": 0.0, "e3g": 1.0, "e3r": 2.0}, {"id": 166289537, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 0.0, "e1r": 0.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 0.0}, {"id": 19225818, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 2.0, "e1r": 2.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 1.0}, {"id": 13857947, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 0.0, "e1r": 0.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 0.0}, {"id": 18557628, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 2.0, "e1r": 0.0, "e2g": 1.0, "e2r": 0.0, "e3g": 0.0, "e3r": 1.0}, {"id": 15836882, "grp": "G0_M3", "e0g": 3.0, "e0r": 0.0, "e1g": 0.0, "e1r": 0.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 0.0}, {"id": 361749369, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 2.0, "e2g": 0.0, "e2r": 0.0, "e3g": 1.0, "e3r": 3.0}, {"id": 361811798, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 2.0, "e1r": 2.0, "e2g": 0.0, "e2r": 0.0, "e3g": 1.0, "e3r": 2.0}, {"id": 19365835, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 2.0, "e2g": 0.0, "e2r": 0.0, "e3g": 1.0, "e3r": 2.0}, {"id": 12932616, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 2.0, "e1r": 3.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 3.0}, {"id": 12546812, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 2.0, "e1r": 3.0, "e2g": 0.0, "e2r": 1.0, "e3g": 0.0, "e3r": 3.0}, {"id": 16940235, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 1.0, "e1r": 1.0, "e2g": 1.0, "e2r": 0.0, "e3g": 0.0, "e3r": 1.0}, {"id": 15478588, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 3.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 3.0}, {"id": 166233310, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 3.0, "e2g": 0.0, "e2r": 1.0, "e3g": 3.0, "e3r": 3.0}, {"id": 360390841, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 0.0, "e1r": 2.0, "e2g": 1.0, "e2r": 0.0, "e3g": 0.0, "e3r": 1.0}, {"id": 190066582, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 3.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 3.0}, {"id": 166075370, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 3.0, "e2g": 0.0, "e2r": 0.0, "e3g": 1.0, "e3r": 3.0}, {"id": 361195109, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 2.0, "e2g": 1.0, "e2r": 1.0, "e3g": 1.0, "e3r": 3.0}, {"id": 13665012, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 2.0, "e1r": 1.0, "e2g": 1.0, "e2r": 0.0, "e3g": 0.0, "e3r": 2.0}, {"id": 19099937, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 3.0, "e2g": 0.0, "e2r": 1.0, "e3g": 0.0, "e3r": 3.0}, {"id": 151585435, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 2.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 3.0}, {"id": 13073760, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 2.0, "e1r": 2.0, "e2g": 1.0, "e2r": 1.0, "e3g": 1.0, "e3r": 2.0}, {"id": 359466852, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 3.0, "e2g": 1.0, "e2r": 1.0, "e3g": 2.0, "e3r": 3.0}, {"id": 19357959, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 3.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 3.0}, {"id": 151236301, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 2.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 2.0}, {"id": 360274252, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 3.0, "e2g": 1.0, "e2r": 1.0, "e3g": 3.0, "e3r": 2.0}, {"id": 20536696, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 2.0, "e2g": 1.0, "e2r": 1.0, "e3g": 0.0, "e3r": 3.0}, {"id": 150300382, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 2.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 3.0}, {"id": 11489366, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 3.0, "e2g": 0.0, "e2r": 0.0, "e3g": 2.0, "e3r": 3.0}, {"id": 20299862, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 2.0, "e1r": 2.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 2.0}, {"id": 359460697, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 3.0, "e2g": 0.0, "e2r": 0.0, "e3g": 1.0, "e3r": 3.0}, {"id": 17252389, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 0.0, "e1r": 1.0, "e2g": 1.0, "e2r": 1.0, "e3g": 0.0, "e3r": 2.0}, {"id": 151681352, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 2.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 2.0}, {"id": 18117526, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 0.0, "e1r": 2.0, "e2g": 1.0, "e2r": 0.0, "e3g": 0.0, "e3r": 2.0}, {"id": 361745561, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 3.0, "e2g": 0.0, "e2r": 0.0, "e3g": 3.0, "e3r": 3.0}, {"id": 16503589, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 3.0, "e2g": 1.0, "e2r": 0.0, "e3g": 2.0, "e3r": 3.0}, {"id": 12364377, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 2.0, "e2g": 1.0, "e2r": 0.0, "e3g": 0.0, "e3r": 3.0}, {"id": 17097081, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 2.0, "e1r": 2.0, "e2g": 1.0, "e2r": 1.0, "e3g": 2.0, "e3r": 2.0}, {"id": 20262383, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 2.0, "e1r": 1.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 2.0}, {"id": 20298327, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 3.0, "e2g": 0.0, "e2r": 1.0, "e3g": 0.0, "e3r": 3.0}, {"id": 359861316, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 0.0, "e1r": 0.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 0.0}, {"id": 18281695, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 3.0, "e2g": 1.0, "e2r": 0.0, "e3g": 0.0, "e3r": 3.0}, {"id": 166067726, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 2.0, "e1r": 2.0, "e2g": 1.0, "e2r": 0.0, "e3g": 1.0, "e3r": 2.0}, {"id": 166081076, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 3.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 2.0}, {"id": 11553122, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 2.0, "e1r": 2.0, "e2g": 1.0, "e2r": 1.0, "e3g": 2.0, "e3r": 2.0}, {"id": 361224069, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 3.0, "e2g": 1.0, "e2r": null, "e3g": 1.0, "e3r": 2.0}, {"id": 19666525, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 2.0, "e1r": 1.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 1.0}, {"id": 104717071, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 2.0, "e1r": 3.0, "e2g": 1.0, "e2r": 0.0, "e3g": 0.0, "e3r": 3.0}, {"id": 361228250, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 2.0, "e1r": 2.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 2.0}, {"id": 360461835, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 3.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 3.0}, {"id": 18976843, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 1.0, "e1r": 3.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 3.0}, {"id": 14444190, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 3.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 1.0}, {"id": 151420489, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 0.0, "e1r": 1.0, "e2g": 1.0, "e2r": 0.0, "e3g": 0.0, "e3r": 0.0}, {"id": 17631975, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 3.0, "e2g": 1.0, "e2r": 0.0, "e3g": 0.0, "e3r": 3.0}, {"id": 14318869, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 2.0, "e2g": 1.0, "e2r": 0.0, "e3g": 0.0, "e3r": 2.0}, {"id": 11866457, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 3.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 3.0}, {"id": 11709512, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 3.0, "e2g": 0.0, "e2r": 0.0, "e3g": 3.0, "e3r": 3.0}, {"id": 359475209, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 2.0, "e1r": 2.0, "e2g": 1.0, "e2r": 1.0, "e3g": 0.0, "e3r": 2.0}, {"id": 19406429, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 2.0, "e1r": 2.0, "e2g": 1.0, "e2r": 1.0, "e3g": 1.0, "e3r": 2.0}, {"id": 16418624, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 1.0, "e1r": 2.0, "e2g": 1.0, "e2r": 1.0, "e3g": 0.0, "e3r": 2.0}, {"id": 13285473, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 2.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 2.0}, {"id": 359466681, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 3.0, "e2g": 1.0, "e2r": 0.0, "e3g": 3.0, "e3r": 3.0}, {"id": 13228601, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 2.0, "e1r": 2.0, "e2g": 1.0, "e2r": 1.0, "e3g": 2.0, "e3r": 2.0}, {"id": 15780900, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 3.0, "e2g": 0.0, "e2r": 0.0, "e3g": 3.0, "e3r": 3.0}, {"id": 359464386, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 3.0, "e2g": 0.0, "e2r": 0.0, "e3g": 1.0, "e3r": 3.0}, {"id": 16913894, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 2.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 2.0}, {"id": 17016097, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 3.0, "e2g": 1.0, "e2r": 1.0, "e3g": 2.0, "e3r": 2.0}, {"id": 16465767, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 1.0, "e1r": 2.0, "e2g": 1.0, "e2r": 1.0, "e3g": 0.0, "e3r": 0.0}, {"id": 20724189, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 3.0, "e2g": 1.0, "e2r": 1.0, "e3g": 3.0, "e3r": 1.0}, {"id": 359464617, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 1.0, "e1r": 2.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 2.0}, {"id": 18125365, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 3.0, "e2g": 0.0, "e2r": 0.0, "e3g": 1.0, "e3r": 2.0}, {"id": 20537147, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 2.0, "e1r": 3.0, "e2g": 0.0, "e2r": 1.0, "e3g": 0.0, "e3r": 2.0}, {"id": 361133622, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 2.0, "e1r": 1.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 1.0}, {"id": 18178023, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 2.0, "e1r": 3.0, "e2g": 1.0, "e2r": 0.0, "e3g": 0.0, "e3r": 3.0}, {"id": 13441205, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 2.0, "e1r": 2.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 1.0}, {"id": 166125014, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 3.0, "e2g": 1.0, "e2r": 1.0, "e3g": 0.0, "e3r": 2.0}, {"id": 359531734, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 1.0, "e1r": 1.0, "e2g": 0.0, "e2r": 1.0, "e3g": 1.0, "e3r": 2.0}, {"id": 20310949, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 3.0, "e2g": 1.0, "e2r": 0.0, "e3g": 3.0, "e3r": 3.0}, {"id": 14567331, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 2.0, "e2g": 0.0, "e2r": 0.0, "e3g": 2.0, "e3r": 3.0}, {"id": 20447521, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 3.0, "e2g": 0.0, "e2r": 0.0, "e3g": 3.0, "e3r": 3.0}, {"id": 359462248, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 3.0, "e2g": 1.0, "e2r": 1.0, "e3g": 0.0, "e3r": 3.0}, {"id": 361732676, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 2.0, "e2g": 1.0, "e2r": 1.0, "e3g": 1.0, "e3r": 2.0}, {"id": 20553829, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 2.0, "e1r": 3.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 3.0}, {"id": 17144792, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 3.0, "e2g": 0.0, "e2r": 1.0, "e3g": 0.0, "e3r": 3.0}, {"id": 12154428, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 2.0, "e1r": 2.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 2.0}, {"id": 17557497, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 2.0, "e2g": 1.0, "e2r": 1.0, "e3g": 2.0, "e3r": 2.0}, {"id": 166033997, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 2.0, "e2g": 1.0, "e2r": 1.0, "e3g": 1.0, "e3r": 3.0}, {"id": 16455459, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 1.0, "e1r": 1.0, "e2g": 1.0, "e2r": null, "e3g": 0.0, "e3r": 2.0}, {"id": 361749160, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 2.0, "e2g": 1.0, "e2r": 0.0, "e3g": 1.0, "e3r": 2.0}, {"id": 17488620, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 2.0, "e2g": 0.0, "e2r": 0.0, "e3g": 1.0, "e3r": 3.0}, {"id": 18957864, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 1.0, "e1r": 1.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 0.0}, {"id": 151426794, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 3.0, "e2g": 0.0, "e2r": 1.0, "e3g": 0.0, "e3r": 3.0}, {"id": 13401960, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 3.0, "e2g": 1.0, "e2r": 1.0, "e3g": 2.0, "e3r": 3.0}, {"id": 12096862, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 3.0, "e2g": 0.0, "e2r": 0.0, "e3g": 2.0, "e3r": 3.0}, {"id": 17181597, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 1.0, "e1r": 1.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 0.0}, {"id": 359677230, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 3.0, "e2g": 1.0, "e2r": 1.0, "e3g": 2.0, "e3r": 3.0}, {"id": 20559650, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 2.0, "e1r": 2.0, "e2g": 0.0, "e2r": 0.0, "e3g": 1.0, "e3r": 2.0}, {"id": 16430611, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 3.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 3.0}, {"id": 11973775, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 3.0, "e2g": 1.0, "e2r": 1.0, "e3g": 3.0, "e3r": 3.0}, {"id": 17024058, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 3.0, "e2g": 1.0, "e2r": 0.0, "e3g": 3.0, "e3r": 3.0}, {"id": 151423231, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 3.0, "e2g": 1.0, "e2r": 0.0, "e3g": 1.0, "e3r": 3.0}, {"id": 166296366, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 2.0, "e1r": 2.0, "e2g": 1.0, "e2r": null, "e3g": 1.0, "e3r": 1.0}, {"id": 18483934, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 2.0, "e2g": 0.0, "e2r": 1.0, "e3g": 0.0, "e3r": 3.0}, {"id": 190140143, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 3.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 3.0}, {"id": 150901495, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 2.0, "e1r": 2.0, "e2g": 0.0, "e2r": 0.0, "e3g": 1.0, "e3r": 2.0}, {"id": 18225154, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 2.0, "e1r": 3.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 3.0}, {"id": 12864171, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 2.0, "e2g": 1.0, "e2r": 1.0, "e3g": 1.0, "e3r": 3.0}, {"id": 12398809, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 2.0, "e1r": 2.0, "e2g": 0.0, "e2r": 1.0, "e3g": 1.0, "e3r": 2.0}, {"id": 15003845, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 3.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 2.0}, {"id": 17173364, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 2.0, "e2g": 0.0, "e2r": 0.0, "e3g": 1.0, "e3r": 2.0}, {"id": 13536373, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 2.0, "e1r": 2.0, "e2g": 1.0, "e2r": 1.0, "e3g": 1.0, "e3r": 2.0}, {"id": 12229008, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 0.0, "e1r": 0.0, "e2g": 1.0, "e2r": 0.0, "e3g": 0.0, "e3r": 0.0}, {"id": 11709865, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 3.0, "e2g": 0.0, "e2r": 0.0, "e3g": 3.0, "e3r": 3.0}, {"id": 360938325, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 3.0, "e2g": 1.0, "e2r": 1.0, "e3g": 0.0, "e3r": 3.0}, {"id": 360493135, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 1.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 2.0}, {"id": 149952057, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 2.0, "e1r": 2.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 2.0}, {"id": 150996717, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 3.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 3.0}, {"id": 13352414, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 1.0, "e1r": 1.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 1.0}, {"id": 16480742, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": null, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": null}, {"id": 151409034, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 3.0, "e2g": 0.0, "e2r": 0.0, "e3g": 3.0, "e3r": 3.0}, {"id": 360526282, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 2.0, "e2g": 1.0, "e2r": 1.0, "e3g": 1.0, "e3r": 3.0}, {"id": 19346129, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 3.0, "e2g": 1.0, "e2r": 1.0, "e3g": 3.0, "e3r": 3.0}, {"id": 18275381, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 3.0, "e2g": 0.0, "e2r": 1.0, "e3g": 0.0, "e3r": 3.0}, {"id": 20320883, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 3.0, "e2g": 1.0, "e2r": 0.0, "e3g": 2.0, "e3r": 3.0}, {"id": 19411982, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 1.0, "e1r": 2.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 2.0}, {"id": 13333675, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 3.0, "e2g": 0.0, "e2r": 0.0, "e3g": 1.0, "e3r": 3.0}, {"id": 20802003, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 2.0, "e1r": 2.0, "e2g": 1.0, "e2r": 0.0, "e3g": 2.0, "e3r": 2.0}, {"id": 19473384, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 3.0, "e2g": 1.0, "e2r": 0.0, "e3g": 1.0, "e3r": 3.0}, {"id": 359466367, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 3.0, "e2g": 1.0, "e2r": 0.0, "e3g": 2.0, "e3r": 3.0}, {"id": 18002163, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 2.0, "e1r": 2.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 1.0}, {"id": 15935784, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 2.0, "e1r": 3.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 2.0}, {"id": 359808798, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 2.0, "e2g": 1.0, "e2r": 1.0, "e3g": 2.0, "e3r": 2.0}, {"id": 17205637, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 3.0, "e2g": 1.0, "e2r": 0.0, "e3g": 2.0, "e3r": 3.0}, {"id": 150976067, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 3.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 3.0}, {"id": 17769472, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 2.0, "e1r": 3.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 3.0}, {"id": 19381947, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 2.0, "e1r": 2.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 3.0}, {"id": 150919611, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 2.0, "e1r": 2.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 3.0}, {"id": 359820799, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 2.0, "e1r": 2.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 2.0}, {"id": 14364570, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 3.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 3.0}, {"id": 151748108, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 3.0, "e2g": 0.0, "e2r": 0.0, "e3g": 1.0, "e3r": 3.0}, {"id": 359466419, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 3.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 3.0}, {"id": 16443683, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 2.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 2.0}, {"id": 17546788, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 0.0, "e1r": 1.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 2.0}, {"id": 18321616, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 3.0, "e2g": 1.0, "e2r": 0.0, "e3g": 3.0, "e3r": 3.0}, {"id": 12228748, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 3.0, "e2g": 0.0, "e2r": 0.0, "e3g": 3.0, "e3r": 3.0}, {"id": 20093470, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 3.0, "e2g": 1.0, "e2r": 1.0, "e3g": 0.0, "e3r": 3.0}, {"id": 15520579, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 3.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 3.0}, {"id": 17904606, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 2.0, "e1r": 2.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 3.0}, {"id": 103037210, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 2.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 2.0}, {"id": 17982590, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 2.0, "e1r": 2.0, "e2g": 1.0, "e2r": 1.0, "e3g": 1.0, "e3r": 3.0}, {"id": 17253467, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 2.0, "e2g": 0.0, "e2r": 0.0, "e3g": 2.0, "e3r": 2.0}, {"id": 19078903, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 3.0, "e2g": 1.0, "e2r": 1.0, "e3g": 0.0, "e3r": 3.0}, {"id": 151623640, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 3.0, "e2g": 1.0, "e2r": 0.0, "e3g": 3.0, "e3r": 3.0}, {"id": 361223987, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 2.0, "e2g": 0.0, "e2r": 1.0, "e3g": 1.0, "e3r": 2.0}, {"id": 11491599, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 3.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 3.0}, {"id": 165872274, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 2.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 3.0}, {"id": 359461380, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 2.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 2.0}, {"id": 361732686, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 3.0, "e2g": 0.0, "e2r": 0.0, "e3g": 2.0, "e3r": 3.0}, {"id": 151648771, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 3.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 3.0}, {"id": 166266587, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 2.0, "e2g": 0.0, "e2r": 1.0, "e3g": 1.0, "e3r": 2.0}, {"id": 361416192, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 3.0, "e2g": 0.0, "e2r": 1.0, "e3g": 0.0, "e3r": 3.0}, {"id": 151077493, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 3.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 3.0}, {"id": 151713727, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 2.0, "e2g": 0.0, "e2r": 0.0, "e3g": 2.0, "e3r": 2.0}, {"id": 361909230, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 3.0, "e2g": 1.0, "e2r": 1.0, "e3g": 3.0, "e3r": 3.0}, {"id": 360271283, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 3.0, "e2g": 0.0, "e2r": 1.0, "e3g": 0.0, "e3r": 3.0}, {"id": 151582567, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 3.0, "e2g": 0.0, "e2r": 0.0, "e3g": 1.0, "e3r": 3.0}, {"id": 151293858, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 3.0, "e2g": 1.0, "e2r": 1.0, "e3g": 3.0, "e3r": 3.0}, {"id": 359462695, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 3.0, "e2g": 1.0, "e2r": 0.0, "e3g": 1.0, "e3r": 3.0}, {"id": 16405838, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 1.0, "e1r": 2.0, "e2g": 1.0, "e2r": 1.0, "e3g": 0.0, "e3r": 1.0}, {"id": 17064786, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 2.0, "e1r": 2.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 2.0}, {"id": 19655214, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 3.0, "e2g": 1.0, "e2r": 0.0, "e3g": 2.0, "e3r": 3.0}, {"id": 20581076, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 3.0, "e2g": 1.0, "e2r": 0.0, "e3g": 2.0, "e3r": 3.0}, {"id": 19303757, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 2.0, "e1r": 2.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 3.0}, {"id": 361732176, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 3.0, "e2g": 1.0, "e2r": 1.0, "e3g": 3.0, "e3r": 3.0}, {"id": 165943102, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 2.0, "e2g": 1.0, "e2r": 0.0, "e3g": 1.0, "e3r": 2.0}, {"id": 20824481, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 1.0, "e1r": 2.0, "e2g": 1.0, "e2r": 0.0, "e3g": 0.0, "e3r": 1.0}, {"id": 151585353, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 2.0, "e1r": 3.0, "e2g": 1.0, "e2r": 1.0, "e3g": 0.0, "e3r": 2.0}, {"id": 361748271, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 1.0, "e1r": 2.0, "e2g": 0.0, "e2r": 0.0, "e3g": 1.0, "e3r": 2.0}, {"id": 12040800, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 2.0, "e1r": null, "e2g": 0.0, "e2r": 1.0, "e3g": 2.0, "e3r": 2.0}, {"id": 359462260, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 3.0, "e2g": 0.0, "e2r": 0.0, "e3g": 1.0, "e3r": 3.0}, {"id": 359463875, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 3.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 3.0}, {"id": 359463011, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 3.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 3.0}, {"id": 166162827, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 3.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 3.0}, {"id": 13869839, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 2.0, "e2g": 1.0, "e2r": 1.0, "e3g": 0.0, "e3r": 2.0}, {"id": 11637583, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 2.0, "e1r": 2.0, "e2g": 1.0, "e2r": null, "e3g": 0.0, "e3r": 3.0}, {"id": 19519090, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 3.0, "e2g": 0.0, "e2r": 0.0, "e3g": 3.0, "e3r": 3.0}, {"id": 359468740, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 3.0, "e2g": 1.0, "e2r": 1.0, "e3g": 0.0, "e3r": 3.0}, {"id": 359464446, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 3.0, "e2g": 1.0, "e2r": 0.0, "e3g": 1.0, "e3r": 3.0}, {"id": 360856026, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 2.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 2.0}, {"id": 11848081, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 3.0, "e2g": 0.0, "e2r": 0.0, "e3g": 3.0, "e3r": 3.0}, {"id": 359649251, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 1.0, "e1r": 2.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 1.0}, {"id": 361016550, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 3.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 3.0}, {"id": 360380990, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 0.0, "e1r": 0.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 0.0}, {"id": 20288457, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 3.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 2.0}, {"id": 16976915, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 3.0, "e2g": 0.0, "e2r": 1.0, "e3g": 3.0, "e3r": 3.0}, {"id": 361937767, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 3.0, "e2g": 0.0, "e2r": 0.0, "e3g": 1.0, "e3r": 3.0}, {"id": 149814016, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 2.0, "e1r": 1.0, "e2g": 1.0, "e2r": 0.0, "e3g": 1.0, "e3r": 1.0}, {"id": 12234728, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 3.0, "e2g": 0.0, "e2r": 0.0, "e3g": 3.0, "e3r": 3.0}, {"id": 18164419, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 2.0, "e1r": 1.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 1.0}, {"id": 12173307, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 3.0, "e2g": 0.0, "e2r": 1.0, "e3g": 2.0, "e3r": 3.0}, {"id": 12979520, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 3.0, "e2g": 1.0, "e2r": 0.0, "e3g": 3.0, "e3r": 3.0}, {"id": 151718689, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 2.0, "e2g": 1.0, "e2r": 1.0, "e3g": 0.0, "e3r": 2.0}, {"id": 361732222, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 1.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 2.0}, {"id": 20539539, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 2.0, "e1r": 2.0, "e2g": 1.0, "e2r": 1.0, "e3g": 0.0, "e3r": 2.0}, {"id": 361732771, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 3.0, "e2g": 0.0, "e2r": 0.0, "e3g": 1.0, "e3r": 3.0}, {"id": 361749362, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 2.0, "e2g": 1.0, "e2r": 0.0, "e3g": 1.0, "e3r": 2.0}, {"id": 361750968, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 3.0, "e2g": 0.0, "e2r": 1.0, "e3g": 0.0, "e3r": 3.0}, {"id": 11709373, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 3.0, "e2g": 0.0, "e2r": 0.0, "e3g": 3.0, "e3r": 3.0}, {"id": 15184621, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 2.0, "e1r": 2.0, "e2g": 1.0, "e2r": 1.0, "e3g": 1.0, "e3r": 2.0}, {"id": 20576445, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 3.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 3.0}, {"id": 18683226, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 2.0, "e1r": 3.0, "e2g": 0.0, "e2r": 1.0, "e3g": 0.0, "e3r": 2.0}, {"id": 361911136, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 2.0, "e2g": 1.0, "e2r": 1.0, "e3g": 3.0, "e3r": 3.0}, {"id": 165656032, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 3.0, "e2g": 1.0, "e2r": 1.0, "e3g": 0.0, "e3r": 3.0}, {"id": 17138001, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 3.0, "e2g": 1.0, "e2r": 1.0, "e3g": 2.0, "e3r": 3.0}, {"id": 359467095, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 3.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 3.0}, {"id": 17063448, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 3.0, "e2g": 0.0, "e2r": 1.0, "e3g": 0.0, "e3r": 3.0}, {"id": 166105647, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 3.0, "e2g": 0.0, "e2r": 0.0, "e3g": 3.0, "e3r": 3.0}, {"id": 11879866, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 3.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 3.0}, {"id": 19345299, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 3.0, "e2g": 0.0, "e2r": 0.0, "e3g": 2.0, "e3r": 3.0}, {"id": 19305801, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 3.0, "e2g": 0.0, "e2r": 0.0, "e3g": 3.0, "e3r": 3.0}, {"id": 359467842, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 3.0, "e2g": 0.0, "e2r": 1.0, "e3g": 1.0, "e3r": 3.0}, {"id": 17521341, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 3.0, "e2g": 0.0, "e2r": 0.0, "e3g": 1.0, "e3r": 3.0}, {"id": 359467023, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 3.0, "e2g": 1.0, "e2r": 1.0, "e3g": 0.0, "e3r": 3.0}, {"id": 20196544, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 3.0, "e2g": 1.0, "e2r": 0.0, "e3g": 0.0, "e3r": 3.0}, {"id": 189926254, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 2.0, "e1r": 2.0, "e2g": 0.0, "e2r": 0.0, "e3g": 1.0, "e3r": 2.0}, {"id": 361117711, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 3.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 3.0}, {"id": 17979394, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 3.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 3.0}, {"id": 360979432, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 3.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 3.0}, {"id": 21102518, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 2.0, "e2g": 1.0, "e2r": 1.0, "e3g": 0.0, "e3r": 1.0}, {"id": 19197331, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 3.0, "e2g": 1.0, "e2r": 1.0, "e3g": 2.0, "e3r": 3.0}, {"id": 361732554, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 2.0, "e1r": 2.0, "e2g": 1.0, "e2r": 0.0, "e3g": 1.0, "e3r": 3.0}, {"id": 18354951, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 3.0, "e2g": 0.0, "e2r": 0.0, "e3g": 3.0, "e3r": 3.0}, {"id": 16404082, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 1.0, "e1r": 1.0, "e2g": 0.0, "e2r": 0.0, "e3g": 1.0, "e3r": 1.0}, {"id": 18126846, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 3.0, "e2g": 1.0, "e2r": 1.0, "e3g": 3.0, "e3r": 3.0}, {"id": 361749557, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 3.0, "e2g": 1.0, "e2r": 0.0, "e3g": 1.0, "e3r": 3.0}, {"id": 361776835, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 3.0, "e2g": 1.0, "e2r": 1.0, "e3g": 2.0, "e3r": 3.0}, {"id": 360264431, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 2.0, "e2g": 0.0, "e2r": 0.0, "e3g": 1.0, "e3r": 2.0}, {"id": 361223930, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 3.0, "e2g": 0.0, "e2r": 1.0, "e3g": 2.0, "e3r": 3.0}, {"id": 11899556, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 3.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 3.0}, {"id": 18239698, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 1.0, "e1r": 1.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 2.0}, {"id": 16475762, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 2.0, "e1r": 2.0, "e2g": 1.0, "e2r": 1.0, "e3g": 0.0, "e3r": 3.0}, {"id": 190106980, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 3.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 3.0}, {"id": 360885555, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 3.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 3.0}, {"id": 151595854, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 2.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 1.0}, {"id": 14312992, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 2.0, "e2g": 1.0, "e2r": 1.0, "e3g": 3.0, "e3r": 1.0}, {"id": 151302895, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 3.0, "e2g": 0.0, "e2r": 0.0, "e3g": 2.0, "e3r": 3.0}, {"id": 16398951, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 3.0, "e2g": 1.0, "e2r": 1.0, "e3g": 3.0, "e3r": 3.0}, {"id": 18378754, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 2.0, "e1r": 2.0, "e2g": 1.0, "e2r": 0.0, "e3g": 0.0, "e3r": 2.0}, {"id": 18261015, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 2.0, "e1r": 3.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 3.0}, {"id": 151694005, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 3.0, "e2g": 1.0, "e2r": 0.0, "e3g": 0.0, "e3r": 3.0}, {"id": 20236161, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 2.0, "e1r": 1.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 1.0}, {"id": 20826002, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 2.0, "e1r": 1.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 2.0}, {"id": 166106369, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 3.0, "e2g": 0.0, "e2r": 0.0, "e3g": 3.0, "e3r": 3.0}, {"id": 151672685, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 3.0, "e2g": 0.0, "e2r": 0.0, "e3g": 2.0, "e3r": 3.0}, {"id": 17024091, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 3.0, "e2g": 0.0, "e2r": 0.0, "e3g": 3.0, "e3r": 3.0}, {"id": 17212749, "grp": "G3_M0", "e0g": 0.0, "e0r": 3.0, "e1g": 3.0, "e1r": 3.0, "e2g": 0.0, "e2r": 0.0, "e3g": 0.0, "e3r": 3.0}], "summary": {"exp0": {"gemma_mean": 1.5, "grok_mean": 1.5, "cross_agree_pct": 0.0, "cross_dist": 3.0}, "exp1": {"gemma_mean_absdiff": 2.14, "grok_mean_absdiff": 0.64, "gemma_pct_changed": 85.0, "grok_pct_changed": 43.4, "cross_agree_pct": 56.6, "cross_dist": 0.59}, "exp2": {"gemma_flip_pct": 62.6, "grok_flip_pct": 36.2, "gemma_flip_from3_pct": 86.4, "gemma_flip_from0_pct": 38.8, "grok_flip_from0_pct": 4.4, "grok_flip_from3_pct": 68.0, "gemma_positive_pct": 25.0, "grok_positive_pct": 17.4, "cross_agree_pct": 77.8, "gemma_uncertain_n": 4, "grok_uncertain_n": 13, "gemma_negative_pct": 73.8, "grok_negative_pct": 78.4, "gemma_uncertain_pct": 0.8, "grok_uncertain_pct": 2.6}, "exp3": {"gemma_mean_absdiff": 1.8, "grok_mean_absdiff": 0.67, "gemma_pct_changed": 69.4, "grok_pct_changed": 44.6, "cross_agree_pct": 35.4, "cross_dist": 1.2}, "n_posts": 500}, "dims": [{"dim": "Causal simplicity", "gemma_pct": 35.2, "grok_pct": 45.9, "agree_pct": 79.6}, {"dim": "Certainty", "gemma_pct": 58.4, "grok_pct": 57.8, "agree_pct": 84.8}, {"dim": "Us vs. them", "gemma_pct": 55.9, "grok_pct": 51.4, "agree_pct": 87.8}, {"dim": "Hidden truth", "gemma_pct": 6.8, "grok_pct": 23.6, "agree_pct": 78.2}, {"dim": "Hidden actor", "gemma_pct": 23.3, "grok_pct": 15.8, "agree_pct": 81.8}, {"dim": "Coordination", "gemma_pct": 7.8, "grok_pct": 8.6, "agree_pct": 87.4}, {"dim": "Target", "gemma_pct": 59.2, "grok_pct": 55.9, "agree_pct": 82.2}, {"dim": "Urgency", "gemma_pct": 24.5, "grok_pct": 29.9, "agree_pct": 86.4}, {"dim": "Sarcasm/irony", "gemma_pct": 12.9, "grok_pct": 24.4, "agree_pct": 85.2}, {"dim": "Mockery/ridicule", "gemma_pct": 18.7, "grok_pct": 22.3, "agree_pct": 89.0}, {"dim": "Coded language", "gemma_pct": 19.5, "grok_pct": 20.5, "agree_pct": 83.0}]};
+
+const plotlyConfig = {displayModeBar: false, responsive: true};
+
+const paperBg = 'rgba(0,0,0,0)';
+const fontColor = '#eef1f8';
+const gridColor = '#1b2436';
+const baseLayout = {
+  paper_bgcolor: paperBg, plot_bgcolor: paperBg,
+  font: {color: fontColor, family: 'inherit', size: 12.5},
+  margin: {t:20, r:20, b:44, l:56},
+};
+
+function chartFallback(id, msg){
+  const el = document.getElementById(id);
+  if (el) el.innerHTML = '<p style="color:#7d8699;font-size:13px;margin:0;padding:12px 4px;">' + msg + '</p>';
+}
+function safeDraw(id, fn){
+  try { fn(); }
+  catch (e) {
+    console.error('Chart failed to render:', id, e);
+    const isLoadError = typeof Plotly === 'undefined';
+    chartFallback(id, isLoadError
+      ? 'Chart library failed to load from the CDN. Check your internet connection and reload this page.'
+      : 'This chart hit an error (' + (e && e.message ? e.message : 'unknown') + '). Open the browser console for details.');
+  }
+}
+
+/* ---- 03 Agreement line chart ---- */
+safeDraw('agreementChart', () => {
+Plotly.newPlot('agreementChart', [{
+  x: ['Exp 0<br>Baseline','Exp 1<br>Justification','Exp 2<br>Decomposition','Exp 3<br>More Specific Likert'],
+  y: [DATA.summary.exp0.cross_agree_pct, DATA.summary.exp1.cross_agree_pct, DATA.summary.exp2.cross_agree_pct, DATA.summary.exp3.cross_agree_pct],
+  type: 'scatter', mode: 'lines+markers+text',
+  text: [DATA.summary.exp0.cross_agree_pct+'%', DATA.summary.exp1.cross_agree_pct+'%', DATA.summary.exp2.cross_agree_pct+'%', DATA.summary.exp3.cross_agree_pct+'%'],
+  textposition: 'top center',
+  line: {color: '#2563eb', width: 3, shape: 'spline'},
+  marker: {color: '#38bdf8', size: 11},
+  fill: 'tozeroy', fillcolor: 'rgba(37,99,235,0.10)'
+}], Object.assign({}, baseLayout, {
+  yaxis: {title: 'Cross-model agreement (%)', range: [0,90], gridcolor: gridColor, zeroline:false},
+  xaxis: {gridcolor: gridColor}
+}), plotlyConfig);
+});
+
+/* ---- 04 Volatility bar chart ---- */
+safeDraw('volatilityChart', () => {
+Plotly.newPlot('volatilityChart', [
+  {x: ['Exp 1','Exp 3'], y: [DATA.summary.exp1.gemma_mean_absdiff, DATA.summary.exp3.gemma_mean_absdiff],
+   type:'bar', name:'GEMMA', marker:{color:'#38bdf8'}},
+  {x: ['Exp 1','Exp 3'], y: [DATA.summary.exp1.grok_mean_absdiff, DATA.summary.exp3.grok_mean_absdiff],
+   type:'bar', name:'GROK', marker:{color:'#6366f1'}}
+], Object.assign({}, baseLayout, {
+  barmode: 'group',
+  yaxis: {title:'Mean |change| from baseline', gridcolor: gridColor, zeroline:false},
+  xaxis: {gridcolor: gridColor},
+  legend: {orientation:'h', y:1.15}
+}), plotlyConfig);
+});
+
+/* ---- 05 Positive / negative / uncertain stacked bar ---- */
+safeDraw('posrateChart', () => {
+Plotly.newPlot('posrateChart', [
+  {x: [DATA.summary.exp2.gemma_positive_pct, DATA.summary.exp2.grok_positive_pct], y: ['GEMMA','GROK'],
+   type:'bar', orientation:'h', name:'Positive', marker:{color:'#38bdf8'},
+   text: [DATA.summary.exp2.gemma_positive_pct+'%', DATA.summary.exp2.grok_positive_pct+'%'], textposition:'inside', insidetextanchor:'middle'},
+  {x: [DATA.summary.exp2.gemma_negative_pct, DATA.summary.exp2.grok_negative_pct], y: ['GEMMA','GROK'],
+   type:'bar', orientation:'h', name:'Negative', marker:{color:'#1d4ed8'},
+   text: [DATA.summary.exp2.gemma_negative_pct+'%', DATA.summary.exp2.grok_negative_pct+'%'], textposition:'inside', insidetextanchor:'middle'},
+  {x: [DATA.summary.exp2.gemma_uncertain_pct, DATA.summary.exp2.grok_uncertain_pct], y: ['GEMMA','GROK'],
+   type:'bar', orientation:'h', name:'Uncertain', marker:{color:'#3a3f52'},
+   text: [DATA.summary.exp2.gemma_uncertain_pct+'%', DATA.summary.exp2.grok_uncertain_pct+'%'], textposition:'inside', insidetextanchor:'middle'}
+], Object.assign({}, baseLayout, {
+  barmode: 'stack',
+  xaxis: {title:'% of 500 posts', range:[0,100], gridcolor: gridColor},
+  yaxis: {gridcolor: gridColor},
+  legend: {orientation:'h', y:1.2},
+  margin: {t:20,r:20,b:44,l:70}
+}), plotlyConfig);
+});
+
+/* ---- 06 Dimension grouped bar ---- */
+safeDraw('dimChart', () => {
+const dims = DATA.dims;
+Plotly.newPlot('dimChart', [
+  {x: dims.map(d=>d.dim), y: dims.map(d=>d.gemma_pct), type:'bar', name:'GEMMA', marker:{color:'#38bdf8'}},
+  {x: dims.map(d=>d.dim), y: dims.map(d=>d.grok_pct), type:'bar', name:'GROK', marker:{color:'#6366f1'}},
+  {x: dims.map(d=>d.dim), y: dims.map(d=>d.agree_pct), type:'scatter', mode:'lines+markers', name:'Agreement %',
+   yaxis:'y2', line:{color:'#eef1f8', width:2, dash:'dot'}, marker:{size:6, color:'#eef1f8'}}
+], Object.assign({}, baseLayout, {
+  barmode: 'group',
+  yaxis: {title:'% posts endorsed', gridcolor: gridColor, zeroline:false},
+  yaxis2: {title:'Agreement %', overlaying:'y', side:'right', range:[0,100], gridcolor:'rgba(0,0,0,0)'},
+  xaxis: {tickangle: -30, gridcolor: gridColor},
+  legend: {orientation:'h', y:1.15},
+  margin: {t:20,r:60,b:110,l:56}
+}), plotlyConfig);
+});
+
+/* ---- 07 Heatmap ---- */
+const cols = ['e0g','e0r','e1g','e1r','e2g','e2r','e3g','e3r'];
+const colLabels = ['Exp0 GEMMA','Exp0 GROK','Exp1 GEMMA','Exp1 GROK','Exp2 GEMMA*','Exp2 GROK*','Exp3 GEMMA','Exp3 GROK'];
+
+function cellVal(post, key){
+  const v = post[key];
+  if (v === null || v === undefined) return -1;
+  if (key === 'e2g' || key === 'e2r') return v * 3;
+  return v;
+}
+function cellText(post, key, idx){
+  const v = post[key];
+  if (v === null || v === undefined) return 'n/a';
+  if (key === 'e2g' || key === 'e2r') return v === 1 ? 'label: 1 (yes)' : 'label: 0 (no)';
+  return 'score: ' + v;
+}
+
+function buildMatrix(postList){
+  const z = [], text = [], rowLabels = [];
+  postList.forEach(p => {
+    z.push(cols.map(c => cellVal(p, c)));
+    text.push(cols.map((c, i) => 'Post ' + p.id + ' (' + p.grp + ')<br>' + colLabels[i] + '<br>' + cellText(p, c, i)));
+    rowLabels.push('#' + p.id);
+  });
+  return {z, text, rowLabels};
+}
+
+const colorscale = [
+  [0, '#2a3040'],
+  [0.001, '#0b2545'],
+  [0.33, '#1d4ed8'],
+  [0.66, '#38bdf8'],
+  [1, '#a7f3ff']
+];
+
+function drawHeatmap(postList, height){
+  safeDraw('heatmapDiv', () => {
+    const m = buildMatrix(postList);
+    Plotly.newPlot('heatmapDiv', [{
+      z: m.z, x: colLabels, y: m.rowLabels, text: m.text, hoverinfo: 'text',
+      type: 'heatmap', colorscale: colorscale, zmin: -1, zmax: 3, showscale: true,
+      xgap: 3, ygap: postList.length > 100 ? 0 : 2,
+      colorbar: {title:'score', tickvals:[-1,0,1,2,3], ticktext:['n/a','0','1','2','3'], thickness: 14}
+    }], Object.assign({}, baseLayout, {
+      height: height,
+      margin: {t:10, r:20, b:70, l:70},
+      xaxis: {tickangle: -30, gridcolor: gridColor, side:'bottom'},
+      yaxis: {gridcolor: gridColor, autorange: 'reversed', tickfont:{size: postList.length>100?7:10}}
+    }), plotlyConfig);
+  });
+}
+
+function finalGap(p){
+  if (p.e3g === null || p.e3r === null) return null;
+  return Math.abs(p.e3g - p.e3r);
+}
+
+let byGapDesc = [], byGapAsc = [];
+try {
+  const allPosts = DATA.posts.slice();
+  const validGap = allPosts.filter(p => finalGap(p) !== null);
+  const missingGap = allPosts.filter(p => finalGap(p) === null);
+  byGapDesc = validGap.slice().sort((a,b) => finalGap(b) - finalGap(a)).concat(missingGap);
+  byGapAsc = validGap.slice().sort((a,b) => finalGap(a) - finalGap(b));
+} catch (e) {
+  console.error('Post data processing failed:', e);
+  chartFallback('heatmapDiv', 'Post data could not be processed. Open the browser console for details.');
+}
+
+function render(view){
+  if (view === 'persist') drawHeatmap(byGapDesc.slice(0,40), 620);
+  else if (view === 'resolved') drawHeatmap(byGapAsc.slice(0,40), 620);
+  else drawHeatmap(byGapDesc, 5200);
+}
+if (byGapDesc.length) render('persist');
+
+document.querySelectorAll('.toggle-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    render(btn.dataset.view);
+  });
+});
+</script>
+</body>
+</html>

@@ -1,8 +1,8 @@
 # Failure Catalogue
 
-Real examples from the 500-post working set, pulled directly from model justification text. A note on content: StormFront posts discuss antisemitic and white-supremacist conspiracy narratives. Quotes below are limited to what's needed to illustrate a labeling failure — model justification text, not full posts, wherever possible.
+Real examples from the 500-post working set, pulled directly from model justification text (quoted, not paraphrased). A note on content: StormFront posts discuss antisemitic and white-supremacist conspiracy narratives. Quotes below are limited to what's needed to illustrate a labeling failure: model justification text, not full posts, wherever possible.
 
-Each example includes the post ID so it can be traced back to `report_data.json`.
+Each example includes the post ID so it can be traced back to `report_data.json`. Experiment numbering matches the current scheme: Exp 0 (0-3 Likert), Exp 1 (0-3 Likert + justification), Exp 2 (0-3 detailed Likert), Exp 3 (0-3 detailed Likert + justification, results pending), Exp 4 (binary, 11-dimension decomposition).
 
 ---
 
@@ -10,35 +10,35 @@ Each example includes the post ID so it can be traced back to `report_data.json`
 
 The model substitutes one construct for another, and applies inconsistent conceptual scope from one post to the next.
 
-**Post 12546812** ("Stalin's Jews") is a real case of this. The post openly and explicitly blames a named group ("some of the greatest murderers... were Jewish") — there's no concealment involved. GEMMA correctly noted this and labeled it non-conspiratorial:
+**Post 12546812** ("Stalin's Jews") is a real case of this. The post openly and explicitly blames a named group ("some of the greatest murderers... were Jewish"). There's no concealment involved. gemma-3-27B correctly noted this and labeled it non-conspiratorial (Exp 4):
 
 > "The post lacks the necessary core dimensions of a conspiracy claim; there is no mention of a hidden actor (5) or secret coordination (6)."
 
-GROK labeled the same post conspiratorial, reasoning that stating a claim "we mustn't forget" functions as evidence of a *hidden* actor:
+xai-grok-3.4 labeled the same post conspiratorial, reasoning that stating a claim "we mustn't forget" functions as evidence of a *hidden* actor:
 
 > "Dimension 5 is present via the framing 'We mustn't forget that some of greatest murderers of modern times were Jewish,' which presents Jewish identity/role as something that has been suppressed."
 
-GROK substituted "openly stated ethnic blame" for "hidden actor" — a construct that specifically requires concealment. Naming a group loudly is not the same as claiming their role is hidden, but the model treated them as interchangeable.
+xai-grok-3.4 substituted "openly stated ethnic blame" for "hidden actor," a construct that specifically requires concealment. Naming a group loudly is not the same as claiming their role is hidden, but the model treated them as interchangeable.
 
 ---
 
 ## 2. Over-picking / Under-picking
 
-The model accepts weak or misattributed evidence too readily (over-picking → false positives), or misses evidence that's actually there (under-picking → false negatives).
+The model accepts weak or misattributed evidence too readily (over-picking, producing false positives), or misses evidence that's actually there (under-picking, producing false negatives).
 
-**Post 21153477** is a clean over-picking example. The post's author is *refuting* a White Nationalist claim, not endorsing it — the text explicitly says the author "assure[s] you he is not a troll" and walks through WN "axioms" only to reject them ("In fact this is not the way jews act or think at all"). GEMMA missed the negation and scored the post as centrally conspiratorial (Exp 2):
+**Post 21153477** is a clean over-picking example. The post's author is *refuting* a White Nationalist claim, not endorsing it. The text explicitly says the author "assure[s] you he is not a troll" and walks through WN "axioms" only to reject them ("In fact this is not the way jews act or think at all"). gemma-3-27B missed the negation and scored the post as centrally conspiratorial (Exp 4):
 
 > "The post describes a conspiracy framework involving a 'conscious plan to destroy the white race'... Because both 5 and 6 are present, the label is 1."
 
-GROK correctly tracked the author's stance, in both Exp 1:
+xai-grok-3.4 correctly tracked the author's stance, in both Exp 1:
 
 > "The post explicitly rejects WN claims of a 'conscious plan' by Jews or coordinated deception... The text debunks rather than endorses such attributions, meeting level 0 criteria."
 
-and Exp 2:
+and Exp 4:
 
 > "It never claims anyone's identity or role is concealed, nor that actors are secretly coordinating... The text instead offers a direct counter-explanation of motives."
 
-GEMMA over-picked: it treated a quoted, debunked belief as if it were the author's own assertion. This is a stance-tracking failure, not a disagreement about what conspiratorial rhetoric looks like.
+gemma-3-27B over-picked: it treated a quoted, debunked belief as if it were the author's own assertion. This is a stance-tracking failure, not a disagreement about what conspiratorial rhetoric looks like.
 
 ---
 
@@ -46,33 +46,53 @@ GEMMA over-picked: it treated a quoted, debunked belief as if it were the author
 
 Different models apply different thresholds to the same prompt, and the gap is only visible once justification is required.
 
-Across all 500 posts, GEMMA labeled 25.0% of posts conspiratorial in Experiment 2 versus GROK's 17.4% — GEMMA was consistently the more liberal scorer in aggregate. But this isn't absolute: on Post 12546812 above, GROK was the one that over-inferred. The direction of the threshold gap isn't fixed; what's consistent is that the two models disagree on where the line sits, post by post, in ways that are only visible once justification forces them to show their work.
+Across all 500 posts, gemma-3-27B labeled 25.0% of posts conspiratorial in Exp 4 versus xai-grok-3.4's 17.4%. gemma-3-27B was consistently the more liberal scorer in aggregate. But this isn't absolute: on Post 12546812 above, xai-grok-3.4 was the one that over-inferred. The direction of the threshold gap isn't fixed; what's consistent is that the two models disagree on where the line sits, post by post, in ways that are only visible once justification forces them to show their work.
 
-**Practical implication:** requiring justification doesn't resolve threshold disagreement — it makes it legible. Whether GEMMA's broader reading or GROK's narrower one is "correct" depends on the researcher's construct: conspiracy as a low-bar gradient, or conspiracy as a narrow, high-bar category.
+**Practical implication:** requiring justification doesn't resolve threshold disagreement, it makes it legible. Whether gemma-3-27B's broader reading or xai-grok-3.4's narrower one is "correct" depends on the researcher's construct: conspiracy as a low-bar gradient, or conspiracy as a narrow, high-bar category.
 
 ---
 
-## 4. Persistent Disagreement: Posts That Never Converged
+## 4. Per Model Justifications
 
-Beyond individual failure types, we looked at which posts stayed high-disagreement across *all four* experiments — baseline, justification, decomposition, and the revised Likert scale. If prompting strategy mattered, disagreement on these posts should have narrowed somewhere along the way. For 30 of the 500 posts (6%), it never did: the two models' scores stayed at least 1 point apart (or fully mismatched, for Exp 2's binary label) at every single stage.
+Characterize each model's sensitivity to prompt instruction. The two models don't just land on different scores, they respond differently to how the prompt itself is written.
 
-That 6% is small, but it's not noise — it clusters around a few distinct causes.
+**xai-grok-3.4's** largest swings, across the four posts where its score moved the most (Exp 0 &rarr; Exp 1 &rarr; Exp 2), all came from bare-link posts (a URL with no other text) pointing to explicitly extremist sites. Under Exp 1, it was willing to infer conspiratorial content from the link's known context:
+
+> "Nazi ideology (and the specific site referenced) is organized around the central claim that societal conditions and white outcomes are the result of deliberate, concealed coordination by hidden actors... This matches Level 3 criteria exactly."
+
+Under the more detailed Likert prompt in Exp 2, it reverted to scoring these same posts 0, treating an empty post body as insufficient evidence regardless of the link. xai-grok-3.4's threshold isn't fixed; it tightens under more explicit scoring criteria.
+
+**gemma-3-27B's** largest swings, across its four biggest movers, all involved explicit antisemitic conspiracy tropes that it confidently scored 3 under Exp 1:
+
+> "The message is organized around a central conspiracy narrative claiming that a specific ethnic group ('the Jew') was the primary adversary in a political struggle... This reflects a core tenet of antisemitic conspiracy theories regarding global control and orchestration."
+
+but dropped to 0 under the more detailed Likert prompt in Exp 2, on the same text. That's a caution against assuming more detailed criteria always improve precision: here, added specificity may have suppressed true positives rather than filtered false ones.
+
+**For prompt engineering:** xai-grok-3.4 responds to explicit, literal criteria; tightening the prompt makes it more conservative, which suits researchers who need a strict, defensible bar (e.g., a binary flag for moderation). gemma-3-27B responds to inference-friendly prompts; it catches more but at the cost of precision, which suits researchers prioritizing recall over strict evidentiary standards, provided its positives get reviewed. Neither tendency is "more accurate", they're differently useful depending on what the label needs to do.
+
+---
+
+## 5. Persistent Disagreement: Posts That Never Converged
+
+Beyond individual failure types, we looked at which posts stayed high-disagreement across every experiment we currently have data for: Exp 0, Exp 1, and Exp 2. If prompting strategy mattered, disagreement on these posts should have narrowed somewhere along the way. For 153 of the 500 posts (30.6%), it never did: the two models' scores stayed at least 1 point apart at every stage.
+
+That's not a small residual, and it's not noise. It clusters around a few distinct causes.
 
 ### Flagship case: Post 19079381
 
-The entire post body is a bare URL (`johnperkins.org/prologue.htm`), no accompanying text. GROK never moved off 0, at every stage, for the same reason each time:
+The entire post body is a bare URL (`johnperkins.org/prologue.htm`), no accompanying text. xai-grok-3.4 never moved off 0, at every stage, for the same reason each time:
 
 > "The post consists solely of a bare URL string with no accompanying prose, assertions, or descriptions... No text exists that could instantiate any of the remaining dimensions."
 
-GEMMA scored it 3 (baseline), 3 (Exp 1), 1/positive (Exp 2), and 3 (Exp 3) — consistently treating the linked page's known content (a book about "economic hit men") as if it were part of the post itself (Exp 1 justification):
+gemma-3-27B scored it 3 (Exp 0), 3 (Exp 1), and 3 (Exp 2), and also labeled it positive under Exp 4's binary decomposition; consistently treating the linked page's known content (a book about "economic hit men") as if it were part of the post itself (Exp 1 justification):
 
-> "The entire narrative is framed as the revelation of a hidden mechanism of global control" — despite there being no narrative text in the post to read.
+> "The entire narrative is framed as the revelation of a hidden mechanism of global control."
 
-This isn't a disagreement about interpreting ambiguous rhetoric. It's a disagreement about whether the model is allowed to score content that isn't in the prompt. No amount of Likert refinement or decomposition would resolve it, because the two models disagree on the rules of the task itself, not on the construct.
+despite there being no narrative text in the post to read. This isn't a disagreement about interpreting ambiguous rhetoric. It's a disagreement about whether the model is allowed to score content that isn't in the prompt, and it holds across every experiment we've run so far, including the binary decomposition. No amount of Likert refinement would resolve it, because the two models disagree on the rules of the task itself, not on the construct.
 
 ### Other recurring patterns in the persistent-disagreement set
 
-- **Chaotic, not stable, disagreement** (e.g., Post 12104737, Post 12364377): rather than one model holding steady while the other moves, both models' scores swing across the full 0–3 range from one experiment to the next, occasionally crossing but never landing together. These posts combine antisemitic slurs with more oblique conspiratorial framing, and neither model applied a consistent read across prompt versions.
-- **Confidently opposite, every time** (e.g., Post 20255110, on moon-landing "faking"): GEMMA scored this 3 at every stage; GROK started at 0 and only partially moved (0 → 0 → negative label → 2). Both models were internally consistent with themselves — they just never agreed with each other.
+- **Chaotic, not stable, disagreement** (e.g., Post 12104737, Post 12364377): rather than one model holding steady while the other moves, both models' scores swing across the full 0-3 range from one experiment to the next, occasionally crossing but never landing together. These posts combine antisemitic slurs with more oblique conspiratorial framing, and neither model applied a consistent read across prompt versions.
+- **Confidently opposite, every time** (e.g., Post 20255110, on moon-landing "faking"): gemma-3-27B scored this 3 at every stage; xai-grok-3.4 started at 0 and only partially moved (0, then 0, then 2). Both models were internally consistent with themselves, they just never agreed with each other.
 
-**Takeaway:** most disagreement in this dataset was addressable through prompting — that's what the 0% → 77.8% agreement swing in Experiment 2 shows. The posts that didn't resolve are diagnostic in their own right: they flag either a task-definition problem (should the model use outside knowledge? Post 19079381) or genuinely unstable model behavior on borderline rhetoric, which is worth flagging to a human coder rather than resolving with a better prompt.
+**Takeaway:** most disagreement in this dataset was addressable through prompting; that's what the 0% to 77.8% agreement swing under Exp 4's decomposition shows. The posts that didn't resolve are diagnostic in their own right: they flag either a task-definition problem (should the model use outside knowledge? Post 19079381) or genuinely unstable model behavior on borderline rhetoric, which is worth flagging to a human coder rather than resolving with a better prompt.

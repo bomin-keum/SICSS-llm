@@ -58,7 +58,7 @@ We can't hand-code ground truth for 383K posts. What we can do is track where ge
 
 - `index.html`: the interactive report.
 - `README.md`: this file.
-- `five_recommendations.md`: five illustrated failure patterns from the 500-post set, each with real quoted model justifications and a practical recommendation.
+- `five_recommendations.md`: five patterns we observed across iterations that could be useful as a checklist for anyone building a similar measurement prompt.
 
 ## Acknowledgment
 

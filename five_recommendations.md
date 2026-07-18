@@ -1,6 +1,6 @@
 # Five Recommendations
 
-Real examples from the 500-post working set, pulled directly from model justification text. A note on content: StormFront posts discuss antisemitic and white-supremacist conspiracy narratives. Quotes below are limited to what's needed to illustrate a labeling failure: model justification text, not full posts, wherever possible.
+Real examples from the 500-post working set, pulled directly from model justification text. A note on content: StormFront posts discuss antisemitic and white-supremacist conspiracy narratives. Quotes below are limited to what's needed to illustrate a labeling failure: model justification text, not full posts.
 
 Each example includes the post ID so it can be traced back to the interactive report where you can see per-post outputs across Exp 0-3. Experiment numbering matches `index.html`: Exp 0 (0-3 Likert), Exp 1 (0-3 Likert + justification), Exp 2 (0-3 detailed Likert), Exp 3 (0-3 detailed Likert + justification), Exp 4 (binary, 11-dimension decomposition). All experiments were run on gemma-3-27B and xai-grok-3.4.
 

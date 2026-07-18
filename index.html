@@ -789,37 +789,37 @@ JUSTIFICATION: [Explanation of why this score was assigned, referencing the scor
       <div class="fail-card">
         <div class="n">01</div>
         <h4>Interchangeability</h4>
-        <p>The model could substitute one construct for another, and apply inconsistent conceptual scopes to what's being measured.</p>
-        <div class="ex"><strong>To-do:</strong> In the prompt, add some focus of not letting the presence of one dimension imply another (for criteria-based) and that each is clearly distinguished (for 0-3 Likert) in how the model is instructed to consider "what counts".</div>
-        <div class="ex"><strong>Example:</strong> ideology can be at risk of being read as conspiracy, conspiracy being read as generalized distrust, or grievance being read as anger.</div>
+        <p>The model substitutes one construct for another, and applies inconsistent conceptual scope from one post to the next.</p>
+        <div class="ex"><strong>To-do:</strong> State explicitly, in the prompt, that the presence of one dimension should not imply another. For criteria-based prompts, define each dimension's boundary. For 0-3 Likert prompts, be explicit about what counts toward the score and what doesn't.</div>
+        <div class="ex"><strong>Example:</strong> a post that openly and loudly blames a named group is not the same as a post that claims a hidden, concealed actor, but a model can treat &ldquo;stated blame&rdquo; and &ldquo;hidden actor&rdquo; as interchangeable.</div>
       </div>
       <div class="fail-card">
         <div class="n">02</div>
         <h4>Over-picking / under-picking</h4>
-        <p>The model accepts weak evidence too readily (inflated false positives), or misses implicit/contextual evidence (false negatives).</p>
-        <div class="ex"><strong>To-do:</strong> Sample high-disagreement posts and read models' justifications for their labels, being attentive to what models see as relevant.</div>
-        <div class="ex"><strong>Example:</strong> gemma-3-27B tended to be more focused on picking up content, and less focused on how the content was said. At times, this led to considering the topic itself to be conspiratorial, even though writer was making fun of it.</div>
+        <p>The model accepts weak or misattributed evidence too readily (over-picking, producing false positives), or misses evidence that's actually there (under-picking, producing false negatives).</p>
+        <div class="ex"><strong>To-do:</strong> Sample high-disagreement posts and, if available, read the models' justifications directly. Pay attention to what each model treats as relevant evidence, not just the score.</div>
+        <div class="ex"><strong>Example:</strong> a post that quotes and refutes a conspiratorial claim can still get scored as if the author endorsed it, a stance-tracking failure rather than a disagreement about what conspiratorial rhetoric looks like.</div>
       </div>
       <div class="fail-card">
         <div class="n">03</div>
         <h4>Inconsistent thresholds</h4>
-        <p>Different models apply different thresholds to the same prompt. These matter for researchers to consider whether a model's interpretation of text aligns with their research focus and interests, and if not, how the prompt should be iteratively refined (e.g. more specific set of criteria to meet).</p>
-        <div class="ex"><strong>To-do:</strong> Require the model to produce justifications, which can provide opportunities for researchers to gain some context for the high-disagreement posts, and determine how they compare with the researchers' approach to measuring the concept of interest.</div>
-        <div class="ex"><strong>Example:</strong> xai-grok-3.4 was more conservative than gemma-3-27B in satisfying the criteria required to label a post "conspiratorial." gemma-3-27B made more inferences and drew that boundary more broadly than intended. Which is preferable depends on the domain, and what the researcher needs to measure (e.g. intending to be able to pick up not yet widely known, newly emerging anti-vaccine conspiracies) as well as how they need to measure it (e.g. in gradients, or as present and not present).</div>
+        <p>Different models apply different thresholds to the same prompt, and the gap is only visible once justification is required.</p>
+        <div class="ex"><strong>To-do:</strong> Require the model to produce justifications: this is also a condition that led to greater agreement in our data. Then decide, for your construct, whether a low-bar gradient (to catch a wider, less-documented range of narratives) or a narrow, high-bar category (to isolate a specific form of conspiracy) is the better fit.</div>
+        <div class="ex"><strong>Example:</strong> one model can be the consistently broader scorer in aggregate while still being the more conservative one on individual posts. The direction of the threshold gap isn't fixed, only the fact that it exists.</div>
       </div>
       <div class="fail-card">
         <div class="n">04</div>
         <h4>Per Model Justifications</h4>
-        <p>Prompting can change LLM-generated labels, in different ways. This requires being attentive to justifications, in how models respond to the criteria specified in the prompt.</p>
-        <div class="ex"><strong>To-do:</strong> consider which model's default behavior is closer to what the task needs: recall-heavy detectability (wider-scope inclusivity) or precision-heavy accuracy (strictly rule-based).</div>
-        <div class="ex"><strong>Example:</strong> gemma-3-27B tended to infer beyond what was explicitly stated in text, while xai-grok-3.4 was more conservative and cited specific parts of text that met/not met the criteria.</div>
+        <p>The two models don't just score posts differently, they respond differently to how the prompt itself is written.</p>
+        <div class="ex"><strong>To-do:</strong> Match the model to the task: a model that responds to explicit, literal criteria suits a strict, defensible bar; a model that responds to inference-friendly prompts catches more but needs its positives reviewed.</div>
+        <div class="ex"><strong>Example:</strong> the same model can swing toward inferring more from ambiguous cues under one prompt version, then swing toward requiring stricter, literal evidence under a more detailed version of the same prompt.</div>
       </div>
       <div class="fail-card wide">
         <div class="n">05</div>
-        <h4>Dataset &amp; domain</h4>
-        <p>Iterations we've done here were adapted to this dataset: short, informal StormFront.org posts about white-supremacist conspiracy narratives. A different domain (e.g. anti-vaccine forums) or a different content type (lengthy, formal documents vs. short, informal user posts) might influence where models over- or under-detect, and would require auditing based on how well the researcher understands their data and domain well.</p>
-        <div class="ex"><strong>To-do:</strong> Revisit and adjust the prompt's criteria for the new domain's characteristic rhetoric (e.g., anti-vaccine posts may rely more on misrepresented studies than on "hidden actor" framing) rather than reusing the same criteria unchanged.</div>
-        <div class="ex"><strong>Example:</strong> a prompt tuned to catch explicit tropes in one-line StormFront posts may under-perform on multi-paragraph anti-vaccine essays, where conspiratorial claims are spread across paragraphs rather than concentrated in a single sentence.</div>
+        <h4>Persistent Disagreement</h4>
+        <p>Some posts stay in disagreement no matter how the prompt changes. 11.4% of the 500 posts kept a score gap of at least 1 point across every experiment we ran (Exp 0&ndash;3).</p>
+        <div class="ex"><strong>To-do:</strong> Flag posts where disagreement never narrows for targeted human validation, and compare them against posts that did flip under different prompting. That comparison points to which textual features the prompt still isn't capturing.</div>
+        <div class="ex"><strong>Example:</strong> a post whose meaning depends on context outside the text itself (a bare link, for instance) can split the models on whether they're allowed to reason beyond the literal words, a disagreement no amount of Likert-scale rewording will resolve.</div>
       </div>
     </div>
 

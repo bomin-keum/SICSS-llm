@@ -80,7 +80,7 @@ but dropped to 0 under the more detailed Likert prompt in Exp 2, on the same tex
 
 Beyond individual failure types, we looked at which posts stayed high-disagreement across every experiment we have data for: Exp 0, Exp 1, Exp 2, and Exp 3. If prompting strategy mattered, our anticipation was that the disagreement on these posts likely narrowed somewhere along the way. For 57 of the 500 posts (11.4%), it never did: the two models' scores stayed at least 1 point apart at every stage.
 
-### Flagship case: Post 19079381
+### Flagship case example: Post 19079381
 
 The entire post body is a bare URL (`johnperkins.org/prologue.htm`), no accompanying text. xai-grok-3.4 never moved off 0, at every stage, for the same reason each time:
 

@@ -1,0 +1,1532 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="referrer" content="no-referrer">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline' 'unsafe-eval' 'wasm-unsafe-eval' blob: data: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://esm.sh https://fonts.bunny.net https://fonts.googleapis.com https://fonts.gstatic.com https://unpkg.com; style-src 'unsafe-inline' blob: data: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://esm.sh https://fonts.bunny.net https://fonts.googleapis.com https://fonts.gstatic.com https://unpkg.com; img-src blob: data: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://esm.sh https://fonts.bunny.net https://fonts.googleapis.com https://fonts.gstatic.com https://unpkg.com; font-src blob: data: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://esm.sh https://fonts.bunny.net https://fonts.googleapis.com https://fonts.gstatic.com https://unpkg.com; media-src blob: data: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://esm.sh https://fonts.bunny.net https://fonts.googleapis.com https://fonts.gstatic.com https://unpkg.com; worker-src blob:; connect-src blob: data:; frame-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<title>Prompt Sensitivity Explorer V2</title>
+<style>:root {
+  color-scheme: light dark;
+  background-color: var(--background) !important;
+
+  /* Agent-facing contract; keep in sync with SKILL.md. */
+  --background: light-dark(rgb(255 255 255), rgb(24 24 24));
+  --foreground: light-dark(rgb(26 28 31), rgb(255 255 255));
+  --card: color-mix(in oklab, var(--foreground) 5%, transparent);
+  --card-foreground: var(--foreground);
+  --popover: light-dark(rgb(255 255 255), rgb(45 45 45));
+  --popover-foreground: var(--foreground);
+  --primary: light-dark(rgb(51 156 255), rgb(131 195 255));
+  --primary-foreground: light-dark(rgb(255 255 255), rgb(13 13 13));
+  --secondary: light-dark(rgb(255 255 255 / 96%), rgb(54 54 54 / 96%));
+  --secondary-foreground: var(--foreground);
+  --muted: color-mix(in srgb, var(--foreground) 10%, transparent);
+  --muted-foreground: light-dark(
+    rgb(26 28 31 / 49.4%),
+    rgb(255 255 255 / 49.8%)
+  );
+  --accent: light-dark(rgb(229 242 255), rgb(13 39 63));
+  --accent-foreground: var(--primary);
+  --destructive: light-dark(rgb(226 85 7), rgb(255 133 73));
+  --border: light-dark(rgb(26 28 31 / 8%), rgb(255 255 255 / 8.2%));
+  --input: light-dark(
+    rgb(26 28 31 / 11.8%),
+    color-mix(in oklab, rgb(0 0 0) 10%, transparent)
+  );
+  --ring: light-dark(rgb(51 156 255), rgb(131 195 255 / 76%));
+  --font-size-base: 14px;
+  --viz-series-1: var(--primary);
+  --viz-series-2: light-dark(rgb(243 136 59), rgb(245 154 86));
+  --viz-series-3: light-dark(rgb(93 201 119), rgb(116 213 139));
+  --viz-series-4: light-dark(rgb(235 119 177), rgb(240 143 192));
+  --viz-series-5: light-dark(rgb(155 121 236), rgb(170 145 239));
+  --viz-series-6: light-dark(rgb(58 185 177), rgb(90 203 194));
+
+  /* Internal implementation variables; not part of the agent contract. */
+  --font-sans: -apple-system, system-ui, "Segoe UI", sans-serif;
+  --font-mono:
+    ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono",
+    monospace;
+  --font-size-normal: max(11px, var(--font-size-base));
+  --font-size-tooltip: calc(var(--font-size-base) - 1px);
+  --font-size-small: max(11px, calc(var(--font-size-base) - 2px));
+  --font-size-h1: calc(var(--font-size-normal) * 1.7142857143);
+  --font-size-h2: calc(var(--font-size-normal) * 1.4285714286);
+  --font-size-h3: calc(var(--font-size-normal) * 1.2857142857);
+  --font-weight-normal: 430;
+  --font-weight-medium: 500;
+  --line-height-normal: calc(var(--font-size-normal) * 1.5);
+  --line-height-tooltip: calc(var(--font-size-tooltip) * 1.4285714286);
+  --line-height-small: calc(var(--font-size-small) + 4px);
+  --radius: 12.5px;
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-2xl: calc(var(--radius) * 1.6);
+  --radius-full: 9999px;
+  --shadow-sm: 0 1px 2px -1px rgb(0 0 0 / 8%);
+  --checkmark-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 17 17'%3E%3Cpath d='M12.8961 3.64101C13.1297 3.41418 13.4984 3.37523 13.7779 3.56581C14.0571 3.75635 14.1554 4.11331 14.0299 4.41347L13.9615 4.53847L7.71151 13.7045C7.59411 13.8767 7.4063 13.9877 7.19881 14.0072C6.99136 14.0267 6.78564 13.9533 6.63826 13.806L2.88826 10.056L2.79842 9.9457C2.6192 9.67407 2.64927 9.30496 2.88826 9.06581C3.12738 8.82669 3.49647 8.79676 3.76815 8.97597L3.8785 9.06581L7.03084 12.2182L12.8053 3.74941L12.8961 3.64101Z'/%3E%3C/svg%3E");
+
+  /* Legacy aliases; not part of the current agent contract. */
+  --viz-bg: transparent;
+  --viz-panel: var(--card);
+  --viz-border: var(--border);
+  --viz-text: var(--foreground);
+  --viz-muted: var(--muted-foreground);
+  --viz-accent: var(--primary);
+  --viz-accent-text: var(--primary-foreground);
+  --viz-accent-bg: var(--accent);
+  --viz-font-size: var(--font-size-base);
+  --viz-warning: var(--destructive);
+  --color-background-primary: var(--background);
+  --color-text-primary: var(--foreground);
+  --color-border-secondary: var(--border);
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html > body {
+  margin: 0;
+  padding: 5px;
+  color: var(--foreground);
+  background: transparent !important;
+  font-family: var(--font-sans);
+  font-size: var(--font-size-normal);
+  font-weight: var(--font-weight-normal);
+  line-height: var(--line-height-normal);
+}
+
+a {
+  color: color-mix(in srgb, var(--viz-accent) 80%, var(--viz-text) 20%);
+  cursor: pointer;
+  font-weight: var(--viz-font-weight-medium);
+  text-decoration: none;
+  text-underline-offset: 2px;
+}
+
+a:is(:hover, :focus-visible) {
+  text-decoration-line: underline;
+  text-decoration-style: dashed;
+  text-decoration-thickness: 0.5px;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p {
+  margin-block: 0;
+}
+
+h1 {
+  font-size: var(--font-size-h1);
+  font-weight: var(--font-weight-medium);
+  line-height: 1.25;
+}
+
+h2 {
+  font-size: var(--font-size-h2);
+  font-weight: var(--font-weight-medium);
+  line-height: 1.25;
+}
+
+h3,
+h4,
+h5,
+h6 {
+  font-size: var(--font-size-h3);
+  font-weight: var(--font-weight-medium);
+  line-height: 1.3;
+}
+
+b,
+strong,
+th {
+  font-weight: var(--font-weight-medium);
+}
+
+code:not(pre code) {
+  display: inline;
+  padding: 1px 6px;
+  border-radius: var(--radius-sm);
+  corner-shape: superellipse(1.5);
+  background: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 0.92em;
+  overflow-wrap: anywhere;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+  word-break: break-word;
+}
+
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  color: var(--foreground);
+  font: inherit;
+  text-align: start;
+}
+
+.table :is(th, td) {
+  padding-block: 10px;
+  padding-inline: 0 24px;
+  overflow-wrap: anywhere;
+  border-bottom: 1px solid var(--border);
+  text-align: start;
+  vertical-align: top;
+}
+
+.table-responsive > .table :is(th, td) {
+  overflow-wrap: break-word;
+}
+
+.table :is(th, td):last-child {
+  padding-inline-end: 0;
+}
+
+.table :is(caption, thead th) {
+  font-weight: 600;
+}
+
+.table thead th {
+  padding-block: 8px;
+  border-bottom-color: color-mix(in srgb, var(--foreground) 16%, transparent);
+}
+
+.table tbody tr:last-child :is(th, td) {
+  border-bottom: 0;
+}
+
+.table.table-sm :is(th, td) {
+  padding-block: 6px;
+}
+
+.table.table-sm :is(th, td):not(:last-child) {
+  padding-inline-end: 16px;
+}
+
+.table :is(.text-end, [align="right"]) {
+  text-align: end;
+  font-variant-numeric: tabular-nums;
+}
+
+.table :is(.text-center, [align="center"]) {
+  text-align: center;
+}
+
+.table .text-nowrap {
+  white-space: nowrap;
+}
+
+#widget {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  padding: 0;
+  background: transparent !important;
+}
+
+.card {
+  min-width: 0;
+  padding: 12px;
+  overflow: hidden;
+  overflow-wrap: break-word;
+  border-radius: var(--radius-2xl);
+  corner-shape: superellipse(1.5);
+  color: var(--card-foreground);
+  background: var(--card);
+}
+
+#widget > :not(.card) {
+  width: 100% !important;
+  max-width: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.tooltip {
+  position: fixed;
+  z-index: 50;
+  top: 0;
+  left: 0;
+  width: max-content;
+  max-width: min(
+    20rem,
+    var(--tooltip-available-width, calc(100vw - 10px)),
+    calc(100vw - 10px)
+  );
+  max-height: min(
+    var(--tooltip-available-height, calc(100vh - 10px)),
+    calc(100vh - 10px)
+  );
+  padding: 4px 8px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  corner-shape: superellipse(1.5);
+  color: var(--popover-foreground);
+  background: var(--popover);
+  box-shadow: none;
+  font-size: var(--font-size-tooltip);
+  line-height: var(--line-height-tooltip);
+  overflow-wrap: break-word;
+  white-space: normal;
+  pointer-events: none;
+  user-select: none;
+}
+
+.viz-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(max(180px, 24%), 1fr));
+  gap: 10px;
+}
+
+.viz-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.viz-stat-value {
+  font-size: var(--font-size-h2);
+  font-weight: var(--font-weight-medium);
+  line-height: 1.25;
+}
+
+.viz-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.viz-badge {
+  padding: 3px 8px;
+  border-radius: var(--radius-full);
+  color: var(--accent-foreground);
+  background: var(--accent);
+  font-weight: var(--font-weight-medium);
+}
+
+small,
+.text-small,
+.viz-badge {
+  font-size: var(--font-size-small);
+  line-height: var(--line-height-small);
+}
+
+.text-muted {
+  color: var(--muted-foreground);
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.viz-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.viz-controls > .form-label {
+  display: grid;
+  min-width: min(100%, 260px);
+  flex: 1 1 280px;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: baseline;
+  gap: 2px 12px;
+  margin-bottom: 0;
+}
+
+.viz-controls > .form-label > :is(.form-control, .form-range, .form-select) {
+  grid-column: 1 / -1;
+}
+
+.btn,
+.form-check-input,
+.form-control,
+.form-range,
+.form-select {
+  font: inherit;
+}
+
+.btn {
+  appearance: button;
+  display: inline-flex;
+  inline-size: fit-content;
+  max-inline-size: 100%;
+  min-height: 28px;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  margin: 0;
+  padding: 0 8px;
+  -webkit-app-region: no-drag;
+  border: 1px solid var(--input);
+  border-radius: var(--radius-lg);
+  corner-shape: superellipse(1.5);
+  color: var(--secondary-foreground);
+  background: var(--secondary);
+  cursor: var(--cursor-interaction, pointer);
+  text-align: center;
+  text-decoration: none;
+  white-space: nowrap;
+  user-select: none;
+  -webkit-font-smoothing: antialiased;
+}
+
+.btn:is(.btn-block, .viz-tile) {
+  inline-size: 100%;
+}
+
+.btn.viz-tile {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  white-space: normal;
+}
+
+a.btn {
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.btn:not(:disabled):hover {
+  background: color-mix(in srgb, var(--foreground) 6%, var(--secondary));
+}
+
+.btn-primary {
+  border-color: transparent;
+  color: var(--primary-foreground);
+  background: var(--foreground);
+  background-clip: padding-box;
+}
+
+.btn-primary .text-muted {
+  color: color-mix(in srgb, var(--primary-foreground) 50%, transparent);
+}
+
+.btn-primary:not(:disabled):hover {
+  background: color-mix(in srgb, var(--foreground) 80%, transparent);
+  background-clip: padding-box;
+}
+
+.btn-ghost {
+  border-color: transparent;
+  color: var(--muted-foreground);
+  background: transparent;
+}
+
+.btn-ghost:not(:disabled):hover {
+  color: var(--foreground);
+  background: color-mix(in srgb, var(--foreground) 6%, var(--secondary));
+}
+
+.btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.4;
+}
+
+[data-lucide] {
+  stroke-width: 1.6;
+}
+
+.form-label {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--foreground);
+}
+
+.form-control {
+  display: block;
+  width: 100%;
+  min-height: 28px;
+  padding: 0 8px;
+  outline: none;
+  border: 1px solid var(--input);
+  border-radius: var(--radius-lg);
+  corner-shape: superellipse(1.5);
+  color: var(--foreground);
+  background: var(--secondary);
+}
+
+.form-control::placeholder {
+  color: var(--muted-foreground);
+}
+
+.form-control[type="file"] {
+  padding: 0;
+  overflow: hidden;
+  cursor: var(--cursor-interaction, pointer);
+}
+
+.form-control[type="file"]::file-selector-button {
+  min-height: 26px;
+  margin-right: 8px;
+  padding: 0 8px;
+  border: 0;
+  border-right: 1px solid var(--input);
+  color: var(--secondary-foreground);
+  background: var(--secondary);
+  cursor: inherit;
+  font: inherit;
+}
+
+.form-control[type="file"]:not(:disabled):hover::file-selector-button {
+  background: color-mix(in srgb, var(--foreground) 6%, var(--secondary));
+}
+
+.form-control-color[type="color"] {
+  width: 40px;
+  height: 28px;
+  padding: 3px;
+  cursor: var(--cursor-interaction, pointer);
+}
+
+.form-control-color[type="color"]::-webkit-color-swatch-wrapper {
+  padding: 0;
+}
+
+.form-control-color[type="color"]::-webkit-color-swatch {
+  border: 0;
+  border-radius: calc(var(--radius-lg) - 4px);
+  corner-shape: superellipse(1.5);
+}
+
+textarea.form-control {
+  height: auto;
+  min-height: 72px;
+  padding: 8px 10px;
+  resize: vertical;
+}
+
+.form-control:focus-visible {
+  border-color: var(--ring);
+  box-shadow: inset 0 0 0 1px var(--ring);
+}
+
+.form-control:disabled,
+.form-select:disabled {
+  cursor: not-allowed;
+  opacity: 0.4;
+}
+
+.form-select {
+  appearance: none;
+  display: block;
+  width: 100%;
+  min-height: 28px;
+  margin: 0;
+  padding: 0 32px 0 8px;
+  outline: none;
+  border: 1px solid var(--input);
+  border-radius: var(--radius-lg);
+  corner-shape: superellipse(1.5);
+  color: var(--foreground);
+  background-color: var(--secondary);
+  background-image:
+    linear-gradient(45deg, transparent 50%, var(--muted-foreground) 50%),
+    linear-gradient(135deg, var(--muted-foreground) 50%, transparent 50%);
+  background-position:
+    calc(100% - 14px) 50%,
+    calc(100% - 10px) 50%;
+  background-repeat: no-repeat;
+  background-size: 4px 4px;
+  cursor: var(--cursor-interaction, default);
+}
+
+.form-select:not(:disabled):hover {
+  background-color: color-mix(in srgb, var(--foreground) 6%, var(--secondary));
+}
+
+.form-select:focus-visible {
+  border-color: var(--ring);
+  box-shadow: inset 0 0 0 1px var(--ring);
+}
+
+.form-check {
+  display: flex;
+  min-height: 20px;
+  align-items: center;
+  gap: 6px;
+}
+
+.form-check-input {
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  flex: 0 0 auto;
+  margin: 0;
+  border: 1px solid var(--input);
+  color: var(--primary-foreground);
+  background-color: transparent;
+  cursor: var(--cursor-interaction, default);
+  transition:
+    background-color 150ms,
+    border-color 150ms,
+    box-shadow 150ms;
+}
+
+.form-check:not(.form-switch) .form-check-input[type="checkbox"] {
+  border-color: var(--input);
+  border-radius: var(--radius-sm);
+  corner-shape: superellipse(1.5);
+  background-color: var(--secondary);
+  box-shadow: var(--shadow-sm);
+}
+
+.form-check:not(.form-switch)
+  .form-check-input:not(:disabled):not(:checked):hover {
+  background-color: var(--card);
+}
+
+.form-check:not(.form-switch) .form-check-input[type="checkbox"]:checked {
+  border-color: var(--primary);
+  background-color: var(--primary);
+}
+
+.form-check:not(.form-switch)
+  .form-check-input[type="checkbox"]:checked::before {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: var(--primary-foreground);
+  content: "";
+  mask: var(--checkmark-image) center / 12px 12px no-repeat;
+}
+
+.form-check-input[type="radio"] {
+  width: 14px;
+  height: 14px;
+  border-radius: var(--radius-full);
+}
+
+.form-check-input[type="radio"]:checked {
+  border: 2px solid var(--primary);
+  background:
+    radial-gradient(circle, var(--primary-foreground) 0 2.5px, transparent 3px),
+    var(--primary);
+}
+
+.form-check:not(.form-switch) .form-check-input:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+.form-check:not(.form-switch) .form-check-input:disabled {
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.form-check:not(.form-switch) .form-check-input:disabled + .form-check-label {
+  cursor: not-allowed;
+}
+
+.form-switch .form-check-input:disabled,
+.form-switch .form-check-input:disabled + .form-check-label {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.form-check-label {
+  color: var(--foreground);
+  cursor: var(--cursor-interaction, default);
+}
+
+.form-switch .form-check-input {
+  position: relative;
+  width: 32px;
+  height: 20px;
+  border: 0;
+  border-radius: var(--radius-full);
+  background: var(--muted);
+  box-shadow: none;
+  transition: background-color 200ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+.form-switch .form-check-input::before {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 16px;
+  height: 16px;
+  box-sizing: border-box;
+  border: 1px solid light-dark(var(--primary-foreground), var(--foreground));
+  border-radius: var(--radius-full);
+  background: light-dark(var(--primary-foreground), var(--foreground));
+  box-shadow: var(--shadow-sm);
+  content: "";
+  transform: translate(2px, -50%);
+  transition: transform 200ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+.form-switch .form-check-input:checked {
+  background: var(--primary);
+}
+
+.form-switch .form-check-input:checked::before {
+  transform: translate(14px, -50%);
+}
+
+.form-switch .form-check-input:focus-visible {
+  box-shadow: 0 0 0 2px var(--ring);
+}
+
+.form-range {
+  appearance: none;
+  display: block;
+  width: 100%;
+  height: 28px;
+  flex: 1;
+  margin: 0;
+  padding: 0;
+  outline: none;
+  border: 0;
+  accent-color: var(--primary);
+  background: linear-gradient(
+      color-mix(in srgb, var(--foreground) 7%, transparent),
+      color-mix(in srgb, var(--foreground) 7%, transparent)
+    )
+    center / 100% 2px no-repeat;
+}
+
+.form-range::-webkit-slider-runnable-track {
+  height: 28px;
+  background: transparent;
+}
+
+.form-range::-webkit-slider-thumb {
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  margin-top: 4px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
+  background: light-dark(var(--primary-foreground), var(--foreground));
+}
+
+.form-range:focus-visible::-webkit-slider-thumb {
+  border-color: var(--ring);
+  box-shadow: inset 0 0 0 1px var(--ring);
+}
+
+.form-range::-moz-range-track {
+  height: 28px;
+  background: transparent;
+}
+
+.form-range::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
+  background: light-dark(var(--primary-foreground), var(--foreground));
+}
+
+.form-range:focus-visible::-moz-range-thumb {
+  border-color: var(--ring);
+  box-shadow: inset 0 0 0 1px var(--ring);
+}
+
+.form-range:disabled {
+  cursor: not-allowed;
+  opacity: 0.4;
+}
+
+.btn:not(.btn-primary, .viz-tile):is(
+    [aria-pressed="true"],
+    [aria-selected="true"],
+    .is-selected
+  ) {
+  border-color: var(--primary);
+  color: var(--primary-foreground);
+  background: var(--primary);
+}
+
+.btn.viz-tile:is([aria-pressed="true"], [aria-selected="true"], .is-selected) {
+  border-color: var(--primary);
+  box-shadow: inset 0 0 0 1px var(--primary);
+}
+
+.btn:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+svg {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+#widget > svg {
+  width: 100%;
+}
+
+.text-warning,
+.text-destructive {
+  color: var(--destructive);
+}
+
+html>body{padding:0}</style>
+</head>
+<body>
+<div id="prompt-sensitivity-explorer-v2">
+  <style>
+    #prompt-sensitivity-explorer-v2 {
+      display: grid;
+      gap: 1rem;
+    }
+    #prompt-sensitivity-explorer-v2 .analysis-section {
+      display: grid;
+      gap: 0.65rem;
+    }
+    #prompt-sensitivity-explorer-v2 .section-heading {
+      margin: 0;
+      color: var(--foreground);
+      font-weight: 500;
+    }
+    #prompt-sensitivity-explorer-v2 .section-description,
+    #prompt-sensitivity-explorer-v2 .matrix-note,
+    #prompt-sensitivity-explorer-v2 .selected-context {
+      margin: 0;
+      color: var(--muted-foreground);
+    }
+    #prompt-sensitivity-explorer-v2 .matrix-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(15rem, 0.75fr);
+      gap: 1rem;
+      align-items: start;
+    }
+    #prompt-sensitivity-explorer-v2 .score-matrix {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+    #prompt-sensitivity-explorer-v2 .matrix-cell {
+      fill: var(--viz-series-1);
+      stroke: var(--border);
+      stroke-width: 1;
+      transition: fill-opacity 180ms ease, stroke-width 180ms ease;
+    }
+    #prompt-sensitivity-explorer-v2 .matrix-diagonal {
+      stroke: color-mix(in srgb, var(--foreground) 55%, var(--border));
+    }
+    #prompt-sensitivity-explorer-v2 .matrix-full-reversal {
+      stroke: var(--destructive);
+    }
+    #prompt-sensitivity-explorer-v2 .matrix-selected {
+      stroke: var(--foreground);
+      stroke-width: 2;
+    }
+    #prompt-sensitivity-explorer-v2 .matrix-hit {
+      cursor: pointer;
+    }
+    #prompt-sensitivity-explorer-v2 .matrix-count,
+    #prompt-sensitivity-explorer-v2 .matrix-share {
+      fill: var(--foreground);
+      text-anchor: middle;
+      pointer-events: none;
+    }
+    #prompt-sensitivity-explorer-v2 .matrix-share,
+    #prompt-sensitivity-explorer-v2 .matrix-axis {
+      fill: var(--muted-foreground);
+      font-size: var(--font-size-small);
+    }
+    #prompt-sensitivity-explorer-v2 .matrix-legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      color: var(--muted-foreground);
+    }
+    #prompt-sensitivity-explorer-v2 .legend-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+    #prompt-sensitivity-explorer-v2 .legend-swatch {
+      width: 0.75rem;
+      height: 0.75rem;
+      background: var(--legend-color);
+    }
+    #prompt-sensitivity-explorer-v2 .selected-panel {
+      display: grid;
+      gap: 0.75rem;
+    }
+    #prompt-sensitivity-explorer-v2 .selected-heading {
+      color: var(--foreground);
+      font-weight: 500;
+    }
+    #prompt-sensitivity-explorer-v2 .selected-summary {
+      color: var(--foreground);
+      font-weight: 500;
+    }
+    @media (max-width: 620px) {
+      #prompt-sensitivity-explorer-v2 .matrix-layout {
+        grid-template-columns: 1fr;
+      }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      #prompt-sensitivity-explorer-v2 .matrix-cell {
+        transition: none;
+      }
+    }
+  </style>
+
+  <div class="viz-controls" aria-label="Explorer filters">
+    <label class="form-label">Comparison run
+      <select id="view-filter" class="form-select">
+        <option value="baseline">Baseline · Prompt 0</option>
+        <option value="p1" selected>Prompt 1 · Likert + justification</option>
+        <option value="p2">Prompt 2 · Detailed Likert</option>
+        <option value="p3">Prompt 3 · Detailed Likert + justification</option>
+      </select>
+    </label>
+    <label class="form-label">Baseline direction
+      <select id="direction-filter" class="form-select">
+        <option value="all">All 500 posts</option>
+        <option value="g3x0">GEMMA 3 / GROK 0</option>
+        <option value="g0x3">GEMMA 0 / GROK 3</option>
+      </select>
+    </label>
+    <label class="form-label">Observed outcome
+      <select id="outcome-filter" class="form-select">
+        <option value="all">All outcomes</option>
+        <option value="agreement">Exact agreement</option>
+        <option value="partial">Gap 1–2 (narrowed)</option>
+        <option value="full-reversal">Gap remains 3</option>
+        <option value="missing">Missing score</option>
+      </select>
+    </label>
+    <label class="form-label">Score pair
+      <select id="score-pair-filter" class="form-select">
+        <option value="all">All score pairs</option>
+      </select>
+    </label>
+    <span id="filter-status" class="viz-badge" aria-live="polite"></span>
+  </div>
+
+  <section class="analysis-section" aria-labelledby="matrix-heading">
+    <h3 id="matrix-heading" class="section-heading">Cross-model score-pair matrix</h3>
+    <p class="section-description text-small">Rows are GEMMA scores; columns are GROK scores. Each cell shows the number of posts and its share of scored posts. Select a cell or score pair to focus the post details.</p>
+
+    <div class="viz-grid" aria-label="Filtered summary">
+      <div class="card viz-stat">
+        <div class="text-muted">Visible posts</div>
+        <div id="visible-value" class="viz-stat-value">0</div>
+        <div id="visible-context">Current filters</div>
+      </div>
+      <div class="card viz-stat">
+        <div class="text-muted">Exact agreement</div>
+        <div id="agreement-value" class="viz-stat-value">—</div>
+        <div id="agreement-context">Scored posts</div>
+      </div>
+      <div class="card viz-stat">
+        <div class="text-muted">Mean score gap</div>
+        <div id="gap-value" class="viz-stat-value">—</div>
+        <div id="gap-context">GEMMA ↔ GROK</div>
+      </div>
+    </div>
+
+    <div class="matrix-layout">
+      <div>
+        <svg id="score-matrix" class="score-matrix" viewBox="0 0 440 344" role="img" aria-labelledby="matrix-title matrix-description">
+          <title id="matrix-title">Cross-model score-pair matrix</title>
+          <desc id="matrix-description">Rows show GEMMA scores and columns show GROK scores for the filtered posts.</desc>
+        </svg>
+        <p id="matrix-note" class="matrix-note text-small"></p>
+        <div class="matrix-legend text-small" aria-label="Matrix legend">
+          <span class="legend-item"><span class="legend-swatch" style="--legend-color: var(--viz-series-1)" aria-hidden="true"></span>Darker = larger share on one fixed scale</span>
+          <span class="legend-item">Diagonal = exact agreement</span>
+          <span class="legend-item"><span class="legend-swatch" style="--legend-color: var(--destructive)" aria-hidden="true"></span>Outline = 0↔3 full reversal</span>
+        </div>
+      </div>
+
+      <aside class="card selected-panel" aria-label="Selected post details">
+        <div class="selected-heading">Selected post details</div>
+        <label class="form-label">Post ID
+          <select id="post-select" class="form-select"></select>
+        </label>
+        <div id="selected-detail" aria-live="polite"></div>
+      </aside>
+    </div>
+  </section>
+
+  <script>
+    (function () {
+      const root = document.getElementById("prompt-sensitivity-explorer-v2");
+      const rawRows = [["361170857",3,0,0,1,0,1,0,0],["11571650",3,0,1,1,0,1,0,0],["151214315",3,0,0,0,0,0,0,0],["150986732",3,0,0,0,0,0,0,0],["13825064",3,0,1,0,0,0,0,0],["14364592",3,0,1,2,0,2,0,0],["359477754",3,0,3,0,0,1,0,0],["360889852",3,0,0,2,0,1,0,1],["359477059",3,0,3,0,0,1,0,0],["166283268",3,0,2,1,1,1,1,0],["14939371",3,0,0,0,0,0,0,0],["11763256",3,0,1,1,0,1,0,0],["19726238",3,0,2,0,1,0,1,0],["151521130",3,0,0,0,0,0,0,0],["360373610",3,0,3,2,1,2,1,1],["14364544",3,0,0,1,0,0,0,0],["12582057",3,0,2,2,0,2,0,1],["13664005",3,0,1,0,0,0,0,0],["19003144",3,0,3,0,0,3,0,0],["361732586",3,0,0,0,0,0,0,0],["11492917",3,0,3,2,3,2,3,0],["361646302",3,0,0,0,0,0,0,0],["13680544",3,0,1,0,0,0,0,0],["360152729",3,0,2,0,0,2,0,0],["16419933",3,0,0,0,0,0,0,0],["361409673",3,0,2,2,0,2,0,0],["18515439",3,0,0,0,0,0,0,0],["361023132",3,0,0,0,0,1,0,null],["11727310",3,0,0,1,0,1,0,0],["19435164",3,0,0,0,0,0,0,0],["19291989",3,0,3,0,0,0,0,0],["17011489",3,0,0,0,0,0,0,0],["19296699",3,0,3,1,0,2,0,0],["18370706",3,0,1,1,0,1,0,0],["17867775",3,0,0,0,0,0,0,0],["16424175",3,0,3,2,0,3,1,1],["14552079",3,0,0,0,0,0,0,0],["17353873",3,0,3,0,0,0,null,0],["151712821",3,0,1,1,1,0,0,0],["360149882",3,0,3,2,0,2,0,0],["18383603",3,0,0,0,0,0,0,0],["20267327",3,0,3,2,0,0,null,0],["14371286",3,0,1,2,0,2,0,0],["360912602",3,0,1,0,0,0,0,0],["15875356",3,0,1,0,0,1,0,0],["361645283",3,0,0,0,0,0,0,0],["361726593",3,0,2,0,0,1,0,0],["19079381",3,0,3,0,3,0,3,0],["150945736",3,0,3,0,0,0,0,0],["11636735",3,0,0,1,0,0,0,0],["15206666",3,0,3,0,0,2,0,0],["19667764",3,0,3,2,0,2,0,0],["17818339",3,0,2,2,0,0,1,1],["166068976",3,0,0,0,0,0,0,0],["19322553",3,0,0,0,0,0,0,0],["19711900",3,0,3,3,3,0,3,0],["12914414",3,0,0,0,0,0,0,0],["19191863",3,0,0,2,0,0,0,0],["13530976",3,0,0,0,0,0,0,0],["151728617",3,0,0,0,0,1,0,0],["17800568",3,0,0,0,0,0,0,0],["11571726",3,0,3,2,0,1,0,0],["361223432",3,0,1,2,1,1,1,0],["18968608",3,0,0,0,0,0,0,0],["361750087",3,0,2,0,0,0,0,0],["151648485",3,0,0,0,0,0,0,0],["361733004",3,0,1,2,0,1,0,0],["151214271",3,0,3,0,0,0,null,0],["359540741",3,0,1,1,0,1,0,0],["151235659",3,0,1,0,0,0,0,0],["20211815",3,0,0,0,0,0,0,0],["15091586",3,0,3,3,3,0,3,0],["17164111",3,0,1,null,0,2,0,0],["360532459",3,0,null,2,3,0,0,0],["16489883",3,0,2,0,0,1,0,0],["165959774",3,0,2,2,0,2,0,1],["151540461",3,0,0,1,0,1,0,0],["151093969",3,0,3,2,0,2,0,0],["20534997",3,0,0,0,0,1,0,null],["360110374",3,0,0,0,0,0,0,0],["361140941",3,0,1,0,0,1,0,0],["15006642",3,0,0,0,0,0,0,0],["18920972",3,0,3,1,0,2,1,1],["359464670",3,0,3,0,0,3,0,0],["361733055",3,0,3,2,0,2,1,0],["361138842",3,0,2,0,0,0,0,0],["16468032",3,0,0,0,0,0,0,0],["359469095",3,0,2,2,0,2,0,1],["150986730",3,0,3,0,0,0,1,0],["13309632",3,0,0,2,0,1,0,0],["17165333",3,0,1,2,0,1,0,null],["18389947",3,0,2,0,1,2,1,0],["361435275",3,0,0,0,0,0,0,0],["20184852",3,0,1,2,1,2,1,1],["16447422",3,0,1,0,0,0,0,0],["150973374",3,0,1,2,0,0,0,0],["15858418",3,0,2,0,0,1,0,0],["15072012",3,0,0,0,0,0,0,0],["359683255",3,0,0,0,0,0,0,0],["15876411",3,0,3,2,3,1,3,0],["19985625",3,0,1,0,0,0,0,0],["18968023",3,0,2,2,0,2,0,0],["360884411",3,0,3,2,0,3,0,0],["15850240",3,0,2,0,0,1,0,0],["18617068",3,0,2,0,0,2,0,0],["13362828",3,0,0,0,0,1,0,0],["11639951",3,0,1,0,0,1,0,0],["11880053",3,0,0,0,0,0,0,0],["151241396",3,0,0,0,0,0,0,0],["359461151",3,0,3,2,0,3,0,0],["15881215",3,0,2,0,0,1,0,0],["12104737",3,0,3,2,0,3,0,1],["361712017",3,0,0,0,0,1,0,0],["151214432",3,0,0,0,null,0,0,0],["11496416",3,0,0,1,0,0,0,0],["151327690",3,0,0,0,0,0,0,0],["360957863",3,0,2,2,0,2,0,0],["11551053",3,0,0,1,0,0,0,0],["16480687",3,0,0,0,0,0,0,0],["151328795",3,0,1,0,0,1,0,0],["19936252",3,0,1,1,1,2,1,0],["360069161",3,0,0,0,0,0,0,0],["11614085",3,0,0,1,0,0,0,0],["15887939",3,0,3,0,3,0,3,0],["361763599",3,0,1,0,0,1,0,0],["13038060",3,0,1,0,0,1,0,0],["11639969",3,0,0,0,0,0,0,0],["11638704",3,0,0,1,0,1,0,0],["11719851",3,0,null,0,0,0,0,0],["20164359",3,0,1,null,0,2,0,0],["151195237",3,0,1,0,0,0,0,0],["359469709",3,0,0,3,0,2,0,null],["21153477",3,0,3,0,0,1,0,0],["361397589",3,0,3,1,0,0,0,0],["17797004",3,0,0,0,0,0,0,0],["359627918",3,0,1,1,0,2,0,0],["18214054",3,0,2,2,0,2,0,1],["14427768",3,0,0,0,0,0,0,0],["359461418",3,0,1,2,0,2,0,0],["13139965",3,0,0,0,0,2,0,0],["361416990",3,0,0,0,0,0,0,0],["361098308",3,0,0,0,0,0,0,0],["15874543",3,0,3,2,3,3,3,1],["17481569",3,0,0,0,0,0,0,0],["360347141",3,0,3,1,1,2,1,1],["361732727",3,0,3,2,0,1,0,0],["18280086",3,0,1,2,0,1,0,null],["11636418",3,0,3,2,0,2,0,1],["17214033",3,0,0,0,0,0,0,0],["19275346",3,0,0,1,0,0,0,0],["359465475",3,0,2,2,0,1,0,0],["19198003",3,0,1,2,0,1,0,0],["19431375",3,0,0,0,0,0,0,0],["15863690",3,0,2,1,1,1,1,0],["15890819",3,0,3,2,3,3,3,0],["19276499",3,0,0,0,0,0,0,0],["151214209",3,0,0,0,0,0,0,0],["17284268",3,0,0,0,0,0,0,0],["17347066",3,0,0,1,0,0,0,3],["13522598",3,0,0,0,0,0,0,0],["18384107",3,0,1,0,0,0,0,0],["11637506",3,0,3,0,3,2,3,0],["14430888",3,0,2,1,0,2,0,0],["361230505",3,0,3,0,0,0,3,0],["360863184",3,0,1,1,0,0,0,0],["18968607",3,0,3,0,0,0,0,0],["151494735",3,0,3,0,0,1,0,0],["361371963",3,0,3,2,0,2,1,0],["151598943",3,0,0,1,0,0,0,0],["151022393",3,0,1,1,0,1,0,0],["361047292",3,0,3,2,0,2,0,0],["361419492",3,0,3,2,0,3,0,0],["12147229",3,0,1,1,1,2,1,1],["165936945",3,0,3,1,0,1,0,1],["360575494",3,0,0,0,0,0,0,0],["11867419",3,0,3,2,0,2,0,1],["18620206",3,0,0,0,0,0,0,0],["361366292",3,0,0,0,0,0,0,0],["359519268",3,0,3,1,0,1,0,0],["361719400",3,0,0,0,0,0,0,0],["17357615",3,0,2,0,0,0,0,0],["20519857",3,0,0,0,0,0,0,0],["361732819",3,0,1,1,0,1,0,0],["12051685",3,0,0,0,0,0,0,0],["11558148",3,0,0,0,0,0,0,0],["12500035",3,0,3,3,0,3,0,1],["18890966",3,0,0,0,0,0,0,0],["359469665",3,0,3,1,0,1,0,null],["13718093",3,0,0,0,0,0,0,0],["11574155",3,0,0,0,0,0,0,0],["13199659",3,0,3,2,0,2,1,0],["151516336",3,0,1,0,0,0,0,0],["14335681",3,0,3,2,0,2,1,0],["149668841",3,0,1,0,0,1,0,0],["166172120",3,0,3,2,0,3,0,1],["11637504",3,0,3,0,null,0,null,0],["104817227",3,0,2,0,0,0,0,0],["15063523",3,0,0,0,0,0,0,0],["20635313",3,0,2,2,0,1,0,0],["359468539",3,0,3,2,0,2,0,1],["16437538",3,0,0,0,0,0,0,0],["13167246",3,0,3,2,3,3,3,1],["150562205",3,0,0,0,0,0,0,0],["19181380",3,0,1,0,0,0,0,0],["20255110",3,0,3,0,3,2,3,0],["18298564",3,0,null,2,null,0,null,0],["15850124",3,0,3,3,0,3,0,0],["13138143",3,0,2,0,0,1,0,0],["166286710",3,0,1,1,0,2,0,0],["12983553",3,0,3,2,0,2,0,1],["18189052",3,0,0,0,0,0,0,0],["151701254",3,0,2,0,0,1,0,null],["19026261",3,0,2,1,0,1,0,0],["19279573",3,0,3,3,3,0,3,0],["103785784",3,0,0,0,0,0,0,0],["13664457",3,0,3,0,3,2,3,0],["151214091",3,0,3,2,3,3,3,3],["361911219",3,0,1,2,0,0,0,0],["21133001",3,0,0,0,0,0,0,0],["17750454",3,0,1,0,0,1,0,0],["361744380",3,0,1,0,0,0,0,0],["151327729",3,0,0,0,0,0,0,0],["361732859",3,0,1,1,0,0,0,0],["18406436",3,0,0,0,0,0,0,0],["166001005",3,0,1,0,0,0,0,0],["361565765",3,0,0,0,0,0,0,0],["12926584",3,0,3,2,0,3,0,null],["13664454",3,0,0,1,0,0,0,0],["14011839",3,0,3,3,null,0,null,0],["360858784",3,0,2,2,1,1,1,1],["20189870",3,0,0,0,0,0,0,0],["149397494",3,0,3,0,2,2,0,0],["151244542",3,0,0,0,0,0,0,0],["361745074",3,0,3,1,0,2,0,0],["12493299",3,0,3,1,1,0,1,0],["19208979",3,0,1,1,0,1,0,1],["16990748",3,0,1,null,0,2,0,0],["165545487",3,0,0,0,0,0,0,0],["19221243",3,0,0,0,0,0,0,0],["13466748",3,0,2,1,0,1,0,0],["151441960",3,0,1,0,0,0,0,0],["16467168",3,0,3,0,0,1,0,0],["19361278",3,0,0,0,0,0,0,0],["151214228",3,0,0,0,0,0,0,0],["18032758",3,0,3,1,1,2,1,0],["166289537",3,0,0,0,0,0,0,0],["19225818",3,0,2,2,0,1,0,0],["13857947",3,0,0,0,0,0,0,0],["18557628",3,0,2,0,0,1,0,1],["15836882",3,0,0,0,0,0,0,0],["361749369",0,3,3,2,1,3,1,1],["361811798",0,3,2,2,1,2,1,1],["19365835",0,3,3,2,1,2,1,2],["12932616",0,3,2,3,0,3,0,1],["12546812",0,3,2,3,0,3,0,1],["16940235",0,3,1,1,0,1,0,0],["15478588",0,3,3,3,0,3,1,0],["166233310",0,3,3,3,3,3,2,null],["360390841",0,3,0,2,0,1,0,0],["190066582",0,3,3,3,0,3,0,1],["166075370",0,3,3,3,1,3,1,1],["361195109",0,3,3,2,1,3,1,3],["13665012",0,3,2,1,0,2,0,1],["19099937",0,3,3,3,0,3,0,3],["151585435",0,3,3,2,0,3,0,0],["13073760",0,3,2,2,1,2,1,1],["359466852",0,3,3,3,2,3,1,null],["19357959",0,3,3,3,0,3,1,1],["151236301",0,3,3,2,0,2,1,0],["360274252",0,3,3,3,3,2,3,2],["20536696",0,3,3,2,0,3,0,1],["150300382",0,3,3,2,0,3,1,1],["11489366",0,3,3,3,2,3,2,2],["20299862",0,3,2,2,0,2,0,1],["359460697",0,3,3,3,1,3,1,3],["17252389",0,3,0,1,0,2,0,0],["151681352",0,3,3,2,0,2,1,0],["18117526",0,3,0,2,0,2,0,1],["361745561",0,3,3,3,3,3,3,null],["16503589",0,3,3,3,2,3,3,3],["12364377",0,3,3,2,0,3,1,1],["17097081",0,3,2,2,2,2,2,2],["20262383",0,3,2,1,0,2,0,0],["20298327",0,3,3,3,0,3,1,1],["359861316",0,3,0,0,0,0,0,0],["18281695",0,3,3,3,0,3,2,3],["166067726",0,3,2,2,1,2,1,1],["166081076",0,3,3,3,0,2,0,1],["11553122",0,3,2,2,2,2,1,2],["361224069",0,3,3,3,1,2,1,1],["19666525",0,3,2,1,0,1,0,0],["104717071",0,3,2,3,0,3,0,3],["361228250",0,3,2,2,0,2,0,0],["360461835",0,3,3,3,0,3,0,1],["18976843",0,3,1,3,0,3,0,null],["14444190",0,3,3,3,0,1,0,0],["151420489",0,3,0,1,0,0,0,0],["17631975",0,3,3,3,0,3,1,3],["14318869",0,3,3,2,0,2,0,0],["11866457",0,3,3,3,0,3,1,null],["11709512",0,3,3,3,3,3,3,3],["359475209",0,3,2,2,0,2,1,1],["19406429",0,3,2,2,1,2,1,0],["16418624",0,3,1,2,0,2,0,2],["13285473",0,3,3,2,0,2,1,0],["359466681",0,3,3,3,3,3,3,3],["13228601",0,3,2,2,2,2,2,2],["15780900",0,3,3,3,3,3,3,1],["359464386",0,3,3,3,1,3,2,1],["16913894",0,3,3,2,0,2,2,null],["17016097",0,3,3,3,2,2,2,2],["16465767",0,3,1,2,0,0,1,1],["20724189",0,3,3,3,3,1,2,1],["359464617",0,3,1,2,0,2,0,1],["18125365",0,3,3,3,1,2,1,1],["20537147",0,3,2,3,0,2,1,2],["361133622",0,3,2,1,0,1,0,1],["18178023",0,3,2,3,0,3,0,1],["13441205",0,3,2,2,0,1,0,0],["166125014",0,3,3,3,0,2,0,1],["359531734",0,3,1,1,1,2,1,1],["20310949",0,3,3,3,3,3,2,3],["14567331",0,3,3,2,2,3,2,1],["20447521",0,3,3,3,3,3,3,3],["359462248",0,3,3,3,0,3,1,1],["361732676",0,3,3,2,1,2,1,1],["20553829",0,3,2,3,0,3,0,1],["17144792",0,3,3,3,0,3,0,0],["12154428",0,3,2,2,0,2,1,1],["17557497",0,3,3,2,2,2,1,1],["166033997",0,3,3,2,1,3,1,1],["16455459",0,3,1,1,0,2,0,0],["361749160",0,3,3,2,1,2,1,1],["17488620",0,3,3,2,1,3,1,1],["18957864",0,3,1,1,0,0,0,0],["151426794",0,3,3,3,0,3,2,2],["13401960",0,3,3,3,2,3,2,3],["12096862",0,3,3,3,2,3,2,1],["17181597",0,3,1,1,0,0,0,0],["359677230",0,3,3,3,2,3,2,null],["20559650",0,3,2,2,1,2,1,1],["16430611",0,3,3,3,0,3,0,3],["11973775",0,3,3,3,3,3,3,3],["17024058",0,3,3,3,3,3,1,0],["151423231",0,3,3,3,1,3,1,1],["166296366",0,3,2,2,1,1,1,1],["18483934",0,3,3,2,0,3,0,0],["190140143",0,3,3,3,0,3,1,1],["150901495",0,3,2,2,1,2,1,2],["18225154",0,3,2,3,0,3,0,0],["12864171",0,3,3,2,1,3,1,1],["12398809",0,3,2,2,1,2,2,1],["15003845",0,3,3,3,0,2,1,1],["17173364",0,3,3,2,1,2,1,1],["13536373",0,3,2,2,1,2,1,1],["12229008",0,3,0,0,0,0,0,null],["11709865",0,3,3,3,3,3,3,null],["360938325",0,3,3,3,0,3,0,1],["360493135",0,3,3,1,0,2,0,0],["149952057",0,3,2,2,0,2,0,2],["150996717",0,3,3,3,0,3,1,1],["13352414",0,3,1,1,0,1,1,1],["16480742",0,3,3,null,0,null,1,1],["151409034",0,3,3,3,3,3,1,2],["360526282",0,3,3,2,1,3,1,2],["19346129",0,3,3,3,3,3,3,3],["18275381",0,3,3,3,0,3,0,3],["20320883",0,3,3,3,2,3,2,3],["19411982",0,3,1,2,0,2,0,0],["13333675",0,3,3,3,1,3,3,1],["20802003",0,3,2,2,2,2,2,2],["19473384",0,3,3,3,1,3,1,3],["359466367",0,3,3,3,2,3,2,2],["18002163",0,3,2,2,0,1,0,0],["15935784",0,3,2,3,0,2,0,1],["359808798",0,3,3,2,2,2,3,0],["17205637",0,3,3,3,2,3,2,0],["150976067",0,3,3,3,0,3,3,1],["17769472",0,3,2,3,0,3,0,0],["19381947",0,3,2,2,0,3,0,1],["150919611",0,3,2,2,0,3,0,1],["359820799",0,3,2,2,0,2,0,1],["14364570",0,3,3,3,0,3,0,1],["151748108",0,3,3,3,1,3,1,1],["359466419",0,3,3,3,0,3,0,1],["16443683",0,3,3,2,0,2,0,1],["17546788",0,3,0,1,0,2,0,0],["18321616",0,3,3,3,3,3,3,3],["12228748",0,3,3,3,3,3,1,1],["20093470",0,3,3,3,0,3,2,2],["15520579",0,3,3,3,0,3,0,1],["17904606",0,3,2,2,0,3,0,0],["103037210",0,3,3,2,0,2,1,0],["17982590",0,3,2,2,1,3,1,1],["17253467",0,3,3,2,2,2,2,2],["19078903",0,3,3,3,0,3,0,1],["151623640",0,3,3,3,3,3,3,3],["361223987",0,3,3,2,1,2,1,1],["11491599",0,3,3,3,0,3,1,2],["165872274",0,3,3,2,0,3,0,1],["359461380",0,3,3,2,0,2,0,2],["361732686",0,3,3,3,2,3,2,1],["151648771",0,3,3,3,0,3,1,1],["166266587",0,3,3,2,1,2,1,1],["361416192",0,3,3,3,0,3,3,3],["151077493",0,3,3,3,0,3,0,0],["151713727",0,3,3,2,2,2,2,3],["361909230",0,3,3,3,3,3,2,1],["360271283",0,3,3,3,0,3,0,1],["151582567",0,3,3,3,1,3,1,1],["151293858",0,3,3,3,3,3,0,2],["359462695",0,3,3,3,1,3,1,3],["16405838",0,3,1,2,0,1,1,1],["17064786",0,3,2,2,0,2,0,0],["19655214",0,3,3,3,2,3,2,3],["20581076",0,3,3,3,2,3,2,3],["19303757",0,3,2,2,0,3,0,null],["361732176",0,3,3,3,3,3,3,3],["165943102",0,3,3,2,1,2,1,1],["20824481",0,3,1,2,0,1,0,0],["151585353",0,3,2,3,0,2,0,2],["361748271",0,3,1,2,1,2,1,1],["12040800",0,3,2,null,2,2,2,null],["359462260",0,3,3,3,1,3,1,3],["359463875",0,3,3,3,0,3,0,1],["359463011",0,3,3,3,0,3,0,1],["166162827",0,3,3,3,0,3,0,3],["13869839",0,3,3,2,0,2,0,1],["11637583",0,3,2,2,0,3,0,1],["19519090",0,3,3,3,3,3,3,null],["359468740",0,3,3,3,0,3,0,1],["359464446",0,3,3,3,1,3,2,3],["360856026",0,3,3,2,0,2,0,0],["11848081",0,3,3,3,3,3,3,1],["359649251",0,3,1,2,0,1,0,0],["361016550",0,3,3,3,0,3,0,0],["360380990",0,3,0,0,0,0,0,0],["20288457",0,3,3,3,0,2,0,1],["16976915",0,3,3,3,3,3,3,2],["361937767",0,3,3,3,1,3,1,3],["149814016",0,3,2,1,1,1,1,1],["12234728",0,3,3,3,3,3,1,null],["18164419",0,3,2,1,0,1,0,1],["12173307",0,3,3,3,2,3,1,3],["12979520",0,3,3,3,3,3,3,1],["151718689",0,3,3,2,0,2,0,1],["361732222",0,3,3,1,0,2,0,0],["20539539",0,3,2,2,0,2,0,2],["361732771",0,3,3,3,1,3,3,1],["361749362",0,3,3,2,1,2,1,1],["361750968",0,3,3,3,0,3,0,1],["11709373",0,3,3,3,3,3,2,1],["15184621",0,3,2,2,1,2,1,2],["20576445",0,3,3,3,0,3,0,0],["18683226",0,3,2,3,0,2,0,0],["361911136",0,3,3,2,3,3,2,2],["165656032",0,3,3,3,0,3,0,1],["17138001",0,3,3,3,2,3,2,2],["359467095",0,3,3,3,0,3,0,3],["17063448",0,3,3,3,0,3,0,1],["166105647",0,3,3,3,3,3,3,1],["11879866",0,3,3,3,0,3,1,1],["19345299",0,3,3,3,2,3,3,1],["19305801",0,3,3,3,3,3,3,1],["359467842",0,3,3,3,1,3,1,3],["17521341",0,3,3,3,1,3,1,2],["359467023",0,3,3,3,0,3,1,3],["20196544",0,3,3,3,0,3,1,3],["189926254",0,3,2,2,1,2,1,2],["361117711",0,3,3,3,0,3,1,1],["17979394",0,3,3,3,0,3,0,1],["360979432",0,3,3,3,0,3,0,0],["21102518",0,3,3,2,0,1,0,1],["19197331",0,3,3,3,2,3,2,3],["361732554",0,3,2,2,1,3,1,1],["18354951",0,3,3,3,3,3,3,1],["16404082",0,3,1,1,1,1,1,1],["18126846",0,3,3,3,3,3,3,3],["361749557",0,3,3,3,1,3,1,1],["361776835",0,3,3,3,2,3,3,3],["360264431",0,3,3,2,1,2,1,0],["361223930",0,3,3,3,2,3,2,3],["11899556",0,3,3,3,0,3,1,0],["18239698",0,3,1,1,0,2,0,0],["16475762",0,3,2,2,0,3,0,1],["190106980",0,3,3,3,0,3,0,0],["360885555",0,3,3,3,0,3,0,1],["151595854",0,3,3,2,0,1,0,0],["14312992",0,3,3,2,3,1,3,0],["151302895",0,3,3,3,2,3,3,null],["16398951",0,3,3,3,3,3,3,2],["18378754",0,3,2,2,0,2,1,1],["18261015",0,3,2,3,0,3,0,1],["151694005",0,3,3,3,0,3,0,3],["20236161",0,3,2,1,0,1,0,0],["20826002",0,3,2,1,0,2,0,1],["166106369",0,3,3,3,3,3,3,null],["151672685",0,3,3,3,2,3,2,1],["17024091",0,3,3,3,3,3,3,null],["17212749",0,3,3,3,0,3,1,1]];
+      const rows = rawRows.map(function (row) {
+        return {
+          id: row[0],
+          baseGemma: row[1], baseGrok: row[2],
+          p1Gemma: row[3], p1Grok: row[4],
+          p2Gemma: row[5], p2Grok: row[6],
+          p3Gemma: row[7], p3Grok: row[8]
+        };
+      });
+      const runMeta = {
+        baseline: { label: "Baseline · Prompt 0", description: "0–3 Likert", gemma: "baseGemma", grok: "baseGrok" },
+        p1: { label: "Prompt 1", description: "0–3 Likert + justification", gemma: "p1Gemma", grok: "p1Grok" },
+        p2: { label: "Prompt 2", description: "0–3 detailed Likert", gemma: "p2Gemma", grok: "p2Grok" },
+        p3: { label: "Prompt 3", description: "0–3 detailed Likert + justification", gemma: "p3Gemma", grok: "p3Grok" }
+      };
+      const viewFilter = root.querySelector("#view-filter");
+      const directionFilter = root.querySelector("#direction-filter");
+      const outcomeFilter = root.querySelector("#outcome-filter");
+      const pairFilter = root.querySelector("#score-pair-filter");
+      const status = root.querySelector("#filter-status");
+      const visibleValue = root.querySelector("#visible-value");
+      const visibleContext = root.querySelector("#visible-context");
+      const agreementValue = root.querySelector("#agreement-value");
+      const agreementContext = root.querySelector("#agreement-context");
+      const gapValue = root.querySelector("#gap-value");
+      const matrix = root.querySelector("#score-matrix");
+      const matrixDescription = root.querySelector("#matrix-description");
+      const matrixNote = root.querySelector("#matrix-note");
+      const postSelect = root.querySelector("#post-select");
+      const detail = root.querySelector("#selected-detail");
+      const matrixCells = [];
+      const ns = "http://www.w3.org/2000/svg";
+      let selectedId = null;
+
+      function element(name, className, text) {
+        const node = document.createElement(name);
+        if (className) node.className = className;
+        if (text !== undefined) node.textContent = text;
+        return node;
+      }
+
+      function svgElement(name) {
+        return document.createElementNS(ns, name);
+      }
+
+      function value(score) {
+        return score === null ? "—" : String(score);
+      }
+
+      function scorePair(row, runKey) {
+        const meta = runMeta[runKey || viewFilter.value];
+        return { gemma: row[meta.gemma], grok: row[meta.grok], label: meta.label, description: meta.description };
+      }
+
+      function outcome(row) {
+        const scores = scorePair(row);
+        if (scores.gemma === null || scores.grok === null) return "missing";
+        const gap = Math.abs(scores.gemma - scores.grok);
+        if (gap === 0) return "agreement";
+        if (gap < 3) return "partial";
+        return "full-reversal";
+      }
+
+      function outcomeLabel(state) {
+        return {
+          agreement: "exact agreement",
+          partial: "gap 1–2 (narrowed)",
+          "full-reversal": "gap remains 3",
+          missing: "missing score"
+        }[state];
+      }
+
+      function matchesDirection(row) {
+        const direction = directionFilter.value;
+        return direction === "all" ||
+          (direction === "g3x0" && row.baseGemma === 3 && row.baseGrok === 0) ||
+          (direction === "g0x3" && row.baseGemma === 0 && row.baseGrok === 3);
+      }
+
+      function matchesOutcome(row) {
+        return outcomeFilter.value === "all" || outcome(row) === outcomeFilter.value;
+      }
+
+      function matchesPair(row) {
+        if (pairFilter.value === "all") return true;
+        const values = pairFilter.value.split("-").map(Number);
+        const scores = scorePair(row);
+        return scores.gemma === values[0] && scores.grok === values[1];
+      }
+
+      function scoreCounts(source, runKey) {
+        const counts = [[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]];
+        let valid = 0;
+        source.forEach(function (row) {
+          const scores = scorePair(row, runKey);
+          if (scores.gemma !== null && scores.grok !== null) {
+            counts[scores.gemma][scores.grok] += 1;
+            valid += 1;
+          }
+        });
+        return { counts: counts, valid: valid };
+      }
+
+      const fixedMaxShare = Math.max.apply(null, Object.keys(runMeta).map(function (runKey) {
+        const distribution = scoreCounts(rows, runKey);
+        const largest = Math.max.apply(null, distribution.counts.flat());
+        return distribution.valid ? largest / distribution.valid : 0;
+      }));
+
+      function setupPairOptions() {
+        for (let gemma = 3; gemma >= 0; gemma -= 1) {
+          for (let grok = 0; grok < 4; grok += 1) {
+            const option = element("option", "", "GEMMA " + gemma + " / GROK " + grok);
+            option.value = gemma + "-" + grok;
+            pairFilter.appendChild(option);
+          }
+        }
+      }
+
+      function setupMatrix() {
+        const plotX = 108;
+        const plotY = 26;
+        const cellSize = 66;
+        const horizontalLabel = svgElement("text");
+        horizontalLabel.setAttribute("x", "240");
+        horizontalLabel.setAttribute("y", "334");
+        horizontalLabel.setAttribute("class", "matrix-axis");
+        horizontalLabel.setAttribute("text-anchor", "middle");
+        horizontalLabel.textContent = "GROK score";
+        matrix.appendChild(horizontalLabel);
+        const verticalLabel = svgElement("text");
+        verticalLabel.setAttribute("x", "22");
+        verticalLabel.setAttribute("y", "158");
+        verticalLabel.setAttribute("class", "matrix-axis");
+        verticalLabel.setAttribute("text-anchor", "middle");
+        verticalLabel.setAttribute("transform", "rotate(-90 22 158)");
+        verticalLabel.textContent = "GEMMA score";
+        matrix.appendChild(verticalLabel);
+        for (let grok = 0; grok < 4; grok += 1) {
+          const axisLabel = svgElement("text");
+          axisLabel.setAttribute("x", String(plotX + grok * cellSize + cellSize / 2));
+          axisLabel.setAttribute("y", String(plotY + cellSize * 4 + 22));
+          axisLabel.setAttribute("class", "matrix-axis");
+          axisLabel.setAttribute("text-anchor", "middle");
+          axisLabel.textContent = String(grok);
+          matrix.appendChild(axisLabel);
+        }
+        for (let gemma = 0; gemma < 4; gemma += 1) {
+          const y = plotY + (3 - gemma) * cellSize;
+          const axisLabel = svgElement("text");
+          axisLabel.setAttribute("x", String(plotX - 14));
+          axisLabel.setAttribute("y", String(y + cellSize / 2 + 5));
+          axisLabel.setAttribute("class", "matrix-axis");
+          axisLabel.setAttribute("text-anchor", "end");
+          axisLabel.textContent = String(gemma);
+          matrix.appendChild(axisLabel);
+          for (let grok = 0; grok < 4; grok += 1) {
+            const group = svgElement("g");
+            group.setAttribute("class", "matrix-hit");
+            const rect = svgElement("rect");
+            rect.setAttribute("x", String(plotX + grok * cellSize));
+            rect.setAttribute("y", String(y));
+            rect.setAttribute("width", String(cellSize));
+            rect.setAttribute("height", String(cellSize));
+            rect.setAttribute("class", "matrix-cell" + (gemma === grok ? " matrix-diagonal" : "") + (Math.abs(gemma - grok) === 3 ? " matrix-full-reversal" : ""));
+            const countLabel = svgElement("text");
+            countLabel.setAttribute("x", String(plotX + grok * cellSize + cellSize / 2));
+            countLabel.setAttribute("y", String(y + cellSize / 2 - 5));
+            countLabel.setAttribute("class", "matrix-count");
+            const shareLabel = svgElement("text");
+            shareLabel.setAttribute("x", String(plotX + grok * cellSize + cellSize / 2));
+            shareLabel.setAttribute("y", String(y + cellSize / 2 + 15));
+            shareLabel.setAttribute("class", "matrix-share");
+            group.append(rect, countLabel, shareLabel);
+            group.addEventListener("click", function () {
+              pairFilter.value = gemma + "-" + grok;
+              render();
+            });
+            matrix.appendChild(group);
+            matrixCells.push({ gemma: gemma, grok: grok, group: group, rect: rect, countLabel: countLabel, shareLabel: shareLabel });
+          }
+        }
+      }
+
+      function updateMatrix(source) {
+        const distribution = scoreCounts(source);
+        const selectedPair = pairFilter.value;
+        matrixCells.forEach(function (cell) {
+          const count = distribution.counts[cell.gemma][cell.grok];
+          const share = distribution.valid ? count / distribution.valid : 0;
+          const opacity = count === 0 ? 0.04 : Math.min(1, 0.1 + 0.9 * share / Math.max(fixedMaxShare, 0.01));
+          cell.rect.setAttribute("fill-opacity", String(opacity));
+          cell.rect.classList.toggle("matrix-selected", selectedPair === cell.gemma + "-" + cell.grok);
+          cell.countLabel.textContent = String(count);
+          cell.shareLabel.textContent = distribution.valid ? (100 * share).toFixed(1) + "%" : "—";
+          cell.group.setAttribute("aria-label", "GEMMA " + cell.gemma + ", GROK " + cell.grok + ": " + count + " posts, " + (100 * share).toFixed(1) + "% of " + distribution.valid + " scored posts");
+        });
+        const meta = runMeta[viewFilter.value];
+        matrixDescription.textContent = meta.label + " score-pair matrix for " + source.length + " posts after the baseline direction and outcome filters. Rows show GEMMA scores and columns show GROK scores.";
+        matrixNote.textContent = meta.label + " · " + meta.description + " · fixed colour scale peaks at " + (100 * fixedMaxShare).toFixed(1) + "% of scored posts across all four runs.";
+      }
+
+      function updateMetrics(visible) {
+        const valid = visible.filter(function (row) {
+          const scores = scorePair(row);
+          return scores.gemma !== null && scores.grok !== null;
+        });
+        const exact = valid.filter(function (row) {
+          const scores = scorePair(row);
+          return scores.gemma === scores.grok;
+        }).length;
+        const meanGap = valid.length ? valid.reduce(function (sum, row) {
+          const scores = scorePair(row);
+          return sum + Math.abs(scores.gemma - scores.grok);
+        }, 0) / valid.length : null;
+        visibleValue.textContent = String(visible.length);
+        visibleContext.textContent = valid.length + " with both scores";
+        agreementValue.textContent = valid.length ? (100 * exact / valid.length).toFixed(1) + "%" : "—";
+        agreementContext.textContent = exact + " of " + valid.length + " scored posts";
+        gapValue.textContent = meanGap === null ? "—" : meanGap.toFixed(2);
+        status.textContent = visible.length + " posts · " + runMeta[viewFilter.value].label;
+      }
+
+      function updatePostSelect(visible) {
+        postSelect.replaceChildren();
+        if (!visible.length) {
+          postSelect.appendChild(element("option", "", "No matching posts"));
+          postSelect.disabled = true;
+          selectedId = null;
+          return;
+        }
+        postSelect.disabled = false;
+        if (!visible.some(function (row) { return row.id === selectedId; })) selectedId = visible[0].id;
+        visible.forEach(function (row) {
+          const option = element("option", "", row.id);
+          option.value = row.id;
+          option.selected = row.id === selectedId;
+          postSelect.appendChild(option);
+        });
+      }
+
+      function detailRow(table, label, scores) {
+        const row = document.createElement("tr");
+        row.append(
+          element("td", "", label),
+          element("td", "text-end", value(scores.gemma)),
+          element("td", "text-end", value(scores.grok)),
+          element("td", "text-end", scores.gemma === null || scores.grok === null ? "—" : String(Math.abs(scores.gemma - scores.grok)))
+        );
+        table.appendChild(row);
+      }
+
+      function updateDetail(row) {
+        detail.replaceChildren();
+        if (!row) {
+          detail.appendChild(element("div", "selected-context", "No posts match these filters."));
+          return;
+        }
+        const current = scorePair(row);
+        detail.appendChild(element("div", "selected-summary", "Post " + row.id));
+        detail.appendChild(element("div", "selected-context text-small", current.label + " outcome: " + outcomeLabel(outcome(row))));
+        const table = document.createElement("table");
+        table.className = "table table-sm";
+        const head = document.createElement("thead");
+        const header = document.createElement("tr");
+        ["Run", "GEMMA", "GROK", "Gap"].forEach(function (text, index) {
+          header.appendChild(element("th", index === 0 ? "" : "text-end", text));
+        });
+        head.appendChild(header);
+        const body = document.createElement("tbody");
+        Object.keys(runMeta).forEach(function (key) {
+          detailRow(body, runMeta[key].label, scorePair(row, key));
+        });
+        table.append(head, body);
+        detail.appendChild(table);
+      }
+
+      function render() {
+        const matrixRows = rows.filter(function (row) { return matchesDirection(row) && matchesOutcome(row); });
+        const visible = matrixRows.filter(matchesPair);
+        updateMetrics(visible);
+        updateMatrix(matrixRows);
+        updatePostSelect(visible);
+        updateDetail(visible.find(function (row) { return row.id === selectedId; }) || null);
+      }
+
+      viewFilter.addEventListener("change", render);
+      directionFilter.addEventListener("change", render);
+      outcomeFilter.addEventListener("change", render);
+      pairFilter.addEventListener("change", render);
+      postSelect.addEventListener("change", function () {
+        selectedId = postSelect.value;
+        updateDetail(rows.find(function (row) { return row.id === selectedId; }) || null);
+      });
+
+      setupPairOptions();
+      setupMatrix();
+      render();
+    }());
+  </script>
+</div>
+
+<script src="https://unpkg.com/@floating-ui/core@1.7.3/dist/floating-ui.core.umd.min.js"></script>
+<script src="https://unpkg.com/@floating-ui/dom@1.7.4/dist/floating-ui.dom.umd.min.js"></script>
+<script>
+(() => {
+  if (window.FloatingUIDOM == null) {
+    return;
+  }
+  const { autoUpdate, computePosition, flip, offset, shift, size } =
+    window.FloatingUIDOM;
+  const tooltipPlacements = new Set(["top", "right", "bottom", "left"]);
+  const tooltipId = `codex-visualization-tooltip-${
+    window.crypto?.randomUUID?.() ?? Date.now().toString(36)
+  }`;
+  const tooltipGap = 5;
+  const hoverDelay = 700;
+  const skipDelay = 300;
+  let activeTrigger = null;
+  let pendingTrigger = null;
+  let tooltip = null;
+  let openTimeout = null;
+  let autoUpdateCleanup = null;
+  let positionRequest = 0;
+  let skipDelayUntil = 0;
+
+  const getTrigger = (target) =>
+    target?.nodeType === Node.ELEMENT_NODE
+      ? target.closest("[data-tooltip]")
+      : null;
+  const containsTarget = (trigger, target) =>
+    target?.nodeType != null && trigger.contains(target);
+  const getContent = (trigger) =>
+    trigger.getAttribute("data-tooltip")?.trim() ?? "";
+  const getPlacement = (trigger) => {
+    const placement = trigger.getAttribute("data-tooltip-placement");
+    return tooltipPlacements.has(placement) ? placement : "top";
+  };
+  const getTooltip = () => {
+    if (tooltip == null) {
+      tooltip = document.createElement("div");
+      tooltip.id = tooltipId;
+      tooltip.className = "tooltip";
+      tooltip.setAttribute("role", "tooltip");
+    }
+    return tooltip;
+  };
+  const setDescribedBy = (trigger, described) => {
+    const ids = new Set(
+      (trigger.getAttribute("aria-describedby") ?? "")
+        .split(/\s+/)
+        .filter(Boolean),
+    );
+    if (described) {
+      ids.add(tooltipId);
+    } else {
+      ids.delete(tooltipId);
+    }
+    if (ids.size === 0) {
+      trigger.removeAttribute("aria-describedby");
+    } else {
+      trigger.setAttribute("aria-describedby", [...ids].join(" "));
+    }
+  };
+  const clearOpenTimeout = () => {
+    if (openTimeout != null) {
+      window.clearTimeout(openTimeout);
+      openTimeout = null;
+    }
+    pendingTrigger = null;
+  };
+  const closeTooltip = (activateSkipDelay = true) => {
+    clearOpenTimeout();
+    positionRequest += 1;
+    autoUpdateCleanup?.();
+    autoUpdateCleanup = null;
+    if (activeTrigger == null) {
+      return;
+    }
+    setDescribedBy(activeTrigger, false);
+    activeTrigger = null;
+    tooltip?.remove();
+    if (activateSkipDelay) {
+      skipDelayUntil = Date.now() + skipDelay;
+    }
+  };
+  const updatePosition = (trigger, floating) => {
+    const request = ++positionRequest;
+    void computePosition(trigger, floating, {
+      middleware: [
+        offset(tooltipGap),
+        flip({ padding: tooltipGap }),
+        shift({ padding: tooltipGap }),
+        size({
+          padding: tooltipGap,
+          apply({ availableHeight, availableWidth, elements }) {
+            elements.floating.style.setProperty(
+              "--tooltip-available-width",
+              `${Math.max(0, availableWidth)}px`,
+            );
+            elements.floating.style.setProperty(
+              "--tooltip-available-height",
+              `${Math.max(0, availableHeight)}px`,
+            );
+          },
+        }),
+      ],
+      placement: getPlacement(trigger),
+      strategy: "fixed",
+    })
+      .then(({ x, y }) => {
+        if (activeTrigger !== trigger || request !== positionRequest) {
+          return;
+        }
+        const scale = window.devicePixelRatio || 1;
+        floating.style.transform = `translate(${Math.round(x * scale) / scale}px, ${Math.round(y * scale) / scale}px)`;
+        floating.style.visibility = "visible";
+      })
+      .catch(() => {
+        if (activeTrigger === trigger && request === positionRequest) {
+          closeTooltip(false);
+        }
+      });
+  };
+  const openTooltip = (trigger) => {
+    const content = getContent(trigger);
+    if (!trigger.isConnected || content.length === 0) {
+      return;
+    }
+    clearOpenTimeout();
+    if (activeTrigger === trigger) {
+      return;
+    }
+    closeTooltip();
+    const floating = getTooltip();
+    floating.textContent = content;
+    floating.style.visibility = "hidden";
+    floating.style.transform = "translate(0, 0)";
+    document.body.appendChild(floating);
+    activeTrigger = trigger;
+    setDescribedBy(trigger, true);
+    autoUpdateCleanup = autoUpdate(trigger, floating, () => {
+      updatePosition(trigger, floating);
+    });
+  };
+  const requestOpen = (trigger, immediate = false) => {
+    if (
+      getContent(trigger).length === 0 ||
+      activeTrigger === trigger ||
+      pendingTrigger === trigger
+    ) {
+      return;
+    }
+    clearOpenTimeout();
+    pendingTrigger = trigger;
+    const delay =
+      immediate || activeTrigger != null || Date.now() < skipDelayUntil
+        ? 0
+        : hoverDelay;
+    if (delay === 0) {
+      openTooltip(trigger);
+      return;
+    }
+    openTimeout = window.setTimeout(() => {
+      openTimeout = null;
+      pendingTrigger = null;
+      openTooltip(trigger);
+    }, delay);
+  };
+  const handlePointerOpen = (event) => {
+    if (event.pointerType === "touch") {
+      return;
+    }
+    const trigger = getTrigger(event.target);
+    if (trigger == null || containsTarget(trigger, event.relatedTarget)) {
+      return;
+    }
+    requestOpen(trigger);
+  };
+  const handleLeave = (event) => {
+    const trigger = getTrigger(event.target);
+    if (trigger == null || containsTarget(trigger, event.relatedTarget)) {
+      return;
+    }
+    if (activeTrigger === trigger || pendingTrigger === trigger) {
+      closeTooltip();
+    }
+  };
+  const handleFocusIn = (event) => {
+    const trigger = getTrigger(event.target);
+    if (trigger?.matches(":focus-visible")) {
+      requestOpen(trigger, true);
+    }
+  };
+  const handleKeyDown = (event) => {
+    if (event.key === "Escape") {
+      closeTooltip();
+    }
+  };
+  const handleContextMenu = (event) => {
+    const trigger = getTrigger(event.target);
+    if (activeTrigger === trigger || pendingTrigger === trigger) {
+      closeTooltip();
+    }
+  };
+  const destroy = () => {
+    closeTooltip(false);
+    document.removeEventListener("pointerover", handlePointerOpen);
+    document.removeEventListener("pointerout", handleLeave);
+    document.removeEventListener("focusin", handleFocusIn);
+    document.removeEventListener("focusout", handleLeave);
+    document.removeEventListener("keydown", handleKeyDown);
+    document.removeEventListener("contextmenu", handleContextMenu);
+    tooltip = null;
+  };
+
+  document.addEventListener("pointerover", handlePointerOpen);
+  document.addEventListener("pointerout", handleLeave);
+  document.addEventListener("focusin", handleFocusIn);
+  document.addEventListener("focusout", handleLeave);
+  document.addEventListener("keydown", handleKeyDown);
+  document.addEventListener("contextmenu", handleContextMenu);
+  window.addEventListener("pagehide", destroy, { once: true });
+})();
+</script>
+<script id="codex-visualization-lucide" async src="https://unpkg.com/lucide@1.17.0/dist/umd/lucide.js"></script>
+<script>
+(() => {
+  const initialize = () => {
+    globalThis.lucide?.createIcons({ attrs: { width: 16, height: 16 } });
+  };
+  if (globalThis.lucide != null) {
+    initialize();
+    return;
+  }
+  document
+    .getElementById("codex-visualization-lucide")
+    ?.addEventListener("load", initialize, { once: true });
+})();
+</script>
+
+</body>
+</html>

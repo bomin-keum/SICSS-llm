@@ -1,0 +1,117 @@
+{
+ "exp0": {
+  "gemma_mean": 1.5,
+  "grok_mean": 1.5,
+  "cross_agree_pct": 0.0,
+  "cross_dist": 3.0
+ },
+ "exp1": {
+  "gemma_mean_absdiff": 2.14,
+  "grok_mean_absdiff": 0.64,
+  "gemma_pct_changed": 85.0,
+  "grok_pct_changed": 43.4,
+  "cross_agree_pct": 56.6,
+  "cross_dist": 0.59
+ },
+ "exp2": {
+  "gemma_mean_absdiff": 1.8,
+  "grok_mean_absdiff": 0.67,
+  "gemma_pct_changed": 69.4,
+  "grok_pct_changed": 44.6,
+  "cross_agree_pct": 35.4,
+  "cross_dist": 1.2
+ },
+ "exp3": {
+  "gemma_mean_absdiff": 1.86,
+  "grok_mean_absdiff": 0.92,
+  "gemma_pct_changed": 77.4,
+  "grok_pct_changed": 49.0,
+  "cross_agree_pct": 65.1,
+  "cross_dist": 0.51,
+  "n": 470
+ },
+ "exp4": {
+  "gemma_flip_pct": 62.6,
+  "grok_flip_pct": 36.2,
+  "cross_agree_pct": 77.8,
+  "gemma_positive_pct": 25.0,
+  "grok_positive_pct": 17.4,
+  "gemma_negative_pct": 73.8,
+  "grok_negative_pct": 78.4,
+  "gemma_uncertain_pct": 0.8,
+  "grok_uncertain_pct": 2.6
+ },
+ "vol_ratio1": 3.34,
+ "vol_ratio2": 2.69,
+ "vol_ratio3": 2.02,
+ "dims": [
+  {
+   "dim": "Causal simplicity",
+   "gemma_pct": 35.2,
+   "grok_pct": 45.9,
+   "agree_pct": 79.6
+  },
+  {
+   "dim": "Certainty",
+   "gemma_pct": 58.4,
+   "grok_pct": 57.8,
+   "agree_pct": 84.8
+  },
+  {
+   "dim": "Us vs. them",
+   "gemma_pct": 55.9,
+   "grok_pct": 51.4,
+   "agree_pct": 87.8
+  },
+  {
+   "dim": "Hidden truth",
+   "gemma_pct": 6.8,
+   "grok_pct": 23.6,
+   "agree_pct": 78.2
+  },
+  {
+   "dim": "Hidden actor",
+   "gemma_pct": 23.3,
+   "grok_pct": 15.8,
+   "agree_pct": 81.8
+  },
+  {
+   "dim": "Coordination",
+   "gemma_pct": 7.8,
+   "grok_pct": 8.6,
+   "agree_pct": 87.4
+  },
+  {
+   "dim": "Target",
+   "gemma_pct": 59.2,
+   "grok_pct": 55.9,
+   "agree_pct": 82.2
+  },
+  {
+   "dim": "Urgency",
+   "gemma_pct": 24.5,
+   "grok_pct": 29.9,
+   "agree_pct": 86.4
+  },
+  {
+   "dim": "Sarcasm/irony",
+   "gemma_pct": 12.9,
+   "grok_pct": 24.4,
+   "agree_pct": 85.2
+  },
+  {
+   "dim": "Mockery/ridicule",
+   "gemma_pct": 18.7,
+   "grok_pct": 22.3,
+   "agree_pct": 89.0
+  },
+  {
+   "dim": "Coded language",
+   "gemma_pct": 19.5,
+   "grok_pct": 20.5,
+   "agree_pct": 83.0
+  }
+ ],
+ "n_persistent": 57,
+ "pct_persistent": 11.4
+}

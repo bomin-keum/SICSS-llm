@@ -70,6 +70,7 @@
   .why-copy p { color: #c7cdde; font-size: 1rem; margin: 0 0 16px; }
   .why-copy p:last-child { margin-bottom: 0; }
   .why-copy strong { color: var(--text); }
+  code { font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace; background: var(--panel2); border: 1px solid var(--border); border-radius: 4px; padding: 1px 6px; font-size: .92em; color: var(--accent2); }
 
   .stat-grid {
     display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-top: 28px;
@@ -777,13 +778,12 @@ JUSTIFICATION: [Explanation of why this score was assigned, referencing the scor
       <li>Which post types deserve early blind human coding, because they will discriminate among competing labels.</li>
     </ol>
     <p class="section-desc">We can&rsquo;t hand-code ground truth for 383K posts. What we can do is track where gemma-3-27B and xai-grok-3.4 agree and disagree, and how that shifts as the prompt changes. That tells us which posts produce persistent disagreement despite prompt refinement, which instructions move one or both models, and which post types would be worth early human coding because they discriminate between competing labelling tendencies.</p>
-    <p class="lead-line">We propose that this offers a leverage: <strong>don&rsquo;t validate every label, validate the ones that could help see the shifts to investigate how, and where, the models disagree.</strong></p>
   </section>
   <section id="failures">
     <div class="section-head">
       <div class="eyebrow">11 &middot; Therefore...</div>
-      <h2>What to check before using an LLM label</h2>
-      <p class="section-desc">We found five patterns across iterations that could be useful as a checklist for anyone building a similar measurement prompt.</p>
+      <h2>5 Recommendations</h2>
+      <p class="section-desc">We found five patterns across iterations that could be useful as a checklist for anyone building a similar measurement prompt. See <code>five_recommendations.md</code> in the repository for a more detailed breakdown on what was observed, and what is recommended for researchers.</p>
     </div>
     <div class="fail-grid">
       <div class="fail-card">

@@ -62,4 +62,4 @@ We can't hand-code ground truth for 383K posts. What we can do is track where ge
 
 ## Acknowledgment
 
-This is a report made during the 2026 Summer Institute of Computational Social Sciences (SICSS) at University of Washington. 
+This is a report made during the 2026 Summer Institute of Computational Social Sciences (SICSS) at University of Washington. StormFront data used for conducting experiments were provided by International CyberCrime Research Institute at Simon Fraser University. 

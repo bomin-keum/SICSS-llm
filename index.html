@@ -302,7 +302,7 @@
 <header class="hero">
   <div class="kicker">SICSS 2026 &middot; University of Washington</div>
   <h1 class="title">Measuring the Unmeasurable?</h1>
-  <div class="subtitle">Auditing and Optimization of LLM-Based Text Classification in the Social Sciences.</div>
+  <div class="subtitle">Auditing and Optimization of LLM-Based Text Classification in the Social Sciences through iterative error analysis.</div>
   <div class="authors">
     <span><span class="who">Bo Min Keum</span> &middot; <span class="aff">International CyberCrime Research Institute, SFU</span></span>
     <span><span class="who">Roman Pomeshchikov</span> &middot; <span class="aff">Near and Middle Eastern Studies (NMES) Interdisciplinary Program, UW</span></span>
@@ -317,14 +317,15 @@
       <h2>&ldquo;Nuance&rdquo; is hard to measure.</h2>
     </div>
     <div class="why-copy">
-      <p>Generative LLMs are increasingly used to classify text. In the social sciences, this may involve very abstract concepts. Human coders can read nuance, but they don't scale to hundreds of thousands of posts: a struggle we experience in our own PhD research on online radicalization discourse (Bo Min Keum) and political discourse (Roman Pomeshchikov). But while LLMs scale, we don't know how good LLMs are for such tasks. LLM-generated labels require extensive human validation, which is time-consuming and resource-heavy. Given this, we come up with a strategy for auditing LLM-labelling in ways that could inform <strong>how best we can use LLMs for measuring nuance in text</strong>.</p>
-      <p>Given that the generative LLM labeling process inherently works on prompting, and prompting affects measurement, <strong>we made the prompting itself the object of our study</strong>. Further, <strong>we propose a high-disagreement sampling and analysis approach as an audit-optimization strategy:</strong> rather than validating every label across hundreds of thousands of texts by hand, we focus on the texts where the models disagree most.</p>
+      <p>Generative LLMs are increasingly used to classify text. In the social sciences, this may involve very abstract concepts. Human coders can read nuance, but they don't scale to hundreds of thousands of posts: a struggle we experience in our own PhD research on online radicalization discourse (Bo Min Keum) and political discourse (Roman Pomeshchikov). But while LLMs scale, LLM-generated labels require extensive human validation, which is time-consuming and resource-heavy. Given this, we come up with a strategy for auditing LLM-labelling in ways that could inform <strong>how best we can use LLMs for measuring nuance in text</strong>.</p>
+      <p>Given that the generative LLM labeling process inherently works on prompting, and prompting affects measurement, <strong>we made the prompting itself the object of our study</strong>. Further, <strong>we propose a high-disagreement sampling and analysis approach as an audit-optimization strategy:</strong> rather than validating every label across hundreds of thousands of texts by hand, we prioritize posts for human review where the models disagree most, since that is where ambiguity, decision-boundary failures, and prompt sensitivity concentrate.</p>
     </div>
   </section>
 
   <section id="overview">
     <div class="section-head">
-      <div class="eyebrow">02 &middot; Overview</div>
+      <div class="eyebrow">02 &middot; Sampling and Experiments Overview</div>
+      <p class="section-desc">We began with a set of 383K StormFront posts that gemma-3-27B and xai-grok-3.1 labeled on the level of their conspiratorial rhetoric, using a 0&ndash;3 Likert scale. From those, we sampled 1.7K posts where gemma-3-27B and xai-grok-3.1 gave polar-opposite baseline scores (one model 0, the other 3) on how conspiratorial a post reads. From those, we randomly sampled 500 posts: 250 gemma-3-27B-3 / xai-grok-3.1-0, and 250 gemma-3-27B-0 / xai-grok-3.1-3. Those same 500 posts were rescored across 4 experiments, using gemma-3-27B and xai-grok-3.4. Because posts were selected for maximum disagreement, this sample naturally concentrates ambiguity and conflict; it is not representative of the full 383K corpus, but a targeted set for surfacing where and why the models disagree.</p>
     </div>
     <div class="pipeline">
       <div class="pipe-box"><div class="big">383K</div><div class="lbl">StormFront.org posts<span class="sub">LLM-labeled on 6 radicalization signals, 0&ndash;3 scale each</span></div></div>
@@ -526,7 +527,7 @@ JUSTIFICATION: [Explanation of why this score was assigned, referencing the scor
   <section id="movement-explorer">
     <div class="section-head">
       <div class="eyebrow">04 &middot; Results: Likert (Exp 0&ndash;3)</div>
-      <h2>When a score changes, how much (and in what direction) do they change?</h2>
+      <h2>When scores change, how much (and in what direction) do they change?</h2>
       <p class="section-desc">Per-model score change from each model's own Exp 0 baseline, grouped by prompt.</p>
     </div>
     <div class="panel">
@@ -768,16 +769,20 @@ JUSTIFICATION: [Explanation of why this score was assigned, referencing the scor
 
   <section id="what-this-can-achieve">
     <div class="section-head">
-      <div class="eyebrow">10 &middot; Concluding Thoughts on &ldquo;Optimization&rdquo;</div>
+      <div class="eyebrow">10 &middot; Thoughts on Optimization</div>
       <h2>What this approach <em>can</em> achieve</h2>
     </div>
-    <p class="section-desc">The 500-post working set and the five experiments can tell us:</p>
+    <p class="section-desc">Once human-coding is applied to the posts of interest, this set can tell us:</p>
     <ol class="validate-list">
       <li>Which posts produce persistent model disagreement despite prompt refinement.</li>
       <li>Which instructions cause one model, or both models, to move more substantially.</li>
-      <li>Which post types deserve early blind human coding, because they will discriminate among competing labels.</li>
+      <li>Which model is systematically too permissive or too restrictive.</li>
+      <li>Which codebook boundaries are underspecified.</li>
+      <li>Which textual patterns trigger errors: irony, quotation, negation, implicit claims, mixed claims, rhetorical questions, or missing context.</li>
+      <li>Whether a prompt revision fixes a general decision rule or merely shifts errors from one label to another.</li>
+      <li>Whether the 0&ndash;3 scale is being used as intended, as an ordinal measure, rather than as four loosely defined nominal classes.</li>
     </ol>
-    <p class="section-desc">We can&rsquo;t hand-code ground truth for 383K posts. What we can do is track where gemma-3-27B and xai-grok-3.4 agree and disagree, and how that shifts as the prompt changes. That tells us which posts produce persistent disagreement despite prompt refinement, which instructions move one or both models, and which post types would be worth early human coding because they discriminate between competing labelling tendencies.</p>
+    <p class="section-desc">We can&rsquo;t hand-code ground truth for 383K posts. Tracking where gemma-3-27B and xai-grok-3.4 agree and disagree, and how that shifts as the prompt changes, gives us a way to target human review instead of validating every label.</p>
   </section>
   <section id="failures">
     <div class="section-head">
